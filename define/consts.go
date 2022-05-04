@@ -1,0 +1,13 @@
+package define
+
+const ESSRESPONSE = "ESS_RESPONSE"
+
+const ESSTOKEN = "ESS_AUTH_BEARER"
+
+const ESSUID = "ESS_UID"
+
+const ESSUSERNAME = "ESS_USER_NAME"
+
+const ESSPOLICY = "ESS_POLICY"
+
+const ESSLOGINSTATUS = "LOGIN_STATUS"
