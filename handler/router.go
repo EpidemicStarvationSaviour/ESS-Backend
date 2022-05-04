@@ -6,12 +6,20 @@ import (
 	"ess/utils/setting"
 
 	"github.com/gin-gonic/gin"
+
+	docs "ess/docs"
+
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+
+	docs.SwaggerInfo.BasePath = "/api"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	r.Use(middlware.CorsMiddleware())
 
@@ -22,7 +30,7 @@ func InitRouter() *gin.Engine {
 		middlware.ResponseMiddleware(),
 		middlware.RewriteToken())
 
-	api.GET("/ping", ping.Pong)
+	api.GET("/ping", ping.Ping)
 
 	return r
 }

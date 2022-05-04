@@ -7,7 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Pong(c *gin.Context) {
+// @Summary ping example
+// @Description test connection
+// @Success 200 {string} pong!
+// @Router /ping [get]
+func Ping(c *gin.Context) {
 	c.Set(define.ESSRESPONSE, response.JSONData(gin.H{
 		"message": "pong!",
 	}))

@@ -1,0 +1,13 @@
+info:
+  contact: {}
+paths:
+  /ping:
+    get:
+      description: test connection
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: ping example
+swagger: "2.0"
