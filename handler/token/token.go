@@ -37,7 +37,7 @@ func Login(c *gin.Context) {
 
 	if userAuth.Email == setting.AdminSetting.Email {
 		if userAuth.Secret == setting.AdminSetting.Password {
-			loginStatus = true
+			loginStatus = true //nolint
 			adminToken, err := authUtils.GetSysAdminToken()
 			if err != nil {
 				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_TOKEN_GENERATE_FAIL))
@@ -74,7 +74,7 @@ func Login(c *gin.Context) {
 	}
 	// check secret
 	if secret == queryUser.UserSecret {
-		loginStatus = true
+		loginStatus = true //nolint
 		jwt, err := authUtils.GetUserToken(queryUser)
 		if err != nil {
 			logging.ErrorF("generate token error for user:%+v\n", queryUser)

@@ -28,5 +28,7 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	s.ListenAndServe()
+	if err := s.ListenAndServe(); err != nil {
+		logging.Error("[server] start error: ", err)
+	}
 }
