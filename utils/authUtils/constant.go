@@ -10,6 +10,7 @@ import (
 
 type Policy interface {
 	AdminOnly() bool
+	LoginOnly() bool
 	CheckExpired() bool
 	SysAdminOnly() bool
 	GetId() int
@@ -24,6 +25,10 @@ type Payload struct {
 	Email  string    `json:"email"`
 	Role   user.Role `json:"role"`
 	jwt.StandardClaims
+}
+
+func (p *Payload) LoginOnly() bool {
+	return p.Role != user.NoLogin
 }
 
 func (p *Payload) AdminOnly() bool {

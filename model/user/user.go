@@ -41,13 +41,13 @@ type UserChangeRoleReq struct {
 }
 
 type AuthReq struct {
-	Type    string `json:"type" binding:"required,oneof=account email"`
-	Account string `json:"account" `
-	Email   string `json:"email" form:"email"`
-	Secret  string `json:"secret" form:"secret" binding:"required"`
+	Type    string `json:"type" example:"email" binding:"required,oneof=account email"`
+	Account string `json:"account" example:"" `
+	Email   string `json:"email" example:"admin@ess.org" form:"email"`
+	Secret  string `json:"secret" example:"essess" form:"secret" binding:"required"`
 }
 
-type AuthResq struct {
+type AuthResp struct {
 	UserName  string `json:"userName"`
 	UserEmail string `json:"userEmail"`
 	UserType  Role   `json:"userType"`

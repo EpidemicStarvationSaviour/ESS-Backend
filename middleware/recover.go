@@ -1,4 +1,4 @@
-package middlware
+package middleware
 
 import (
 	"bytes"
@@ -33,7 +33,7 @@ var (
 )
 
 // print stack trace
-// stack returns a nicely formatted stack frame, skipping skip frames.
+// get a nicely formatted stack frame, skipping skip frames.
 func stack(skip int) []byte {
 	buf := new(bytes.Buffer) // the returned data
 	// As we loop, we open files and read them. These variables record the currently
@@ -60,7 +60,7 @@ func stack(skip int) []byte {
 	return buf.Bytes()
 }
 
-// source returns a space-trimmed slice of the n'th line.
+// get a space-trimmed slice of the n'th line.
 func source(lines [][]byte, n int) []byte {
 	n-- // in stack trace, lines are 1-indexed but our array is 0-indexed
 	if n < 0 || n >= len(lines) {
@@ -69,7 +69,7 @@ func source(lines [][]byte, n int) []byte {
 	return bytes.TrimSpace(lines[n])
 }
 
-// function returns, if possible, the name of the function containing the PC.
+// get the name of the function containing the PC
 func function(pc uintptr) []byte {
 	fn := runtime.FuncForPC(pc)
 	if fn == nil {

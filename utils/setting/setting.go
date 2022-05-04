@@ -2,11 +2,11 @@
 package setting
 
 import (
+	"log"
 	"path/filepath"
 
 	"github.com/go-ini/ini"
 
-	"log"
 	"time"
 )
 
@@ -54,6 +54,7 @@ type Admin struct {
 	Password string
 	UserId   int
 	Name     string
+	Phone    string
 }
 
 var AdminSetting = &Admin{}
@@ -61,6 +62,8 @@ var AdminSetting = &Admin{}
 type Secret struct {
 	JwtKey    string
 	JwtIssuer string
+	SaltA     string
+	SaltB     string
 }
 
 var SecretSetting = &Secret{}

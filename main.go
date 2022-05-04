@@ -2,6 +2,7 @@ package main
 
 import (
 	"ess/handler"
+	"ess/utils/db"
 	"ess/utils/logging"
 	"ess/utils/setting"
 	"fmt"
@@ -15,6 +16,7 @@ func main() {
 
 	setting.Setup()
 	logging.Setup()
+	db.Setup()
 
 	router := handler.InitRouter()
 	logging.Info("[server] running on ", setting.ServerSetting.HttpPort)

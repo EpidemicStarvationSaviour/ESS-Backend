@@ -1,13 +1,207 @@
+definitions:
+  user.AuthReq:
+    properties:
+      account:
+        example: ""
+        type: string
+      email:
+        example: admin@ess.org
+        type: string
+      secret:
+        example: essess
+        type: string
+      type:
+        enum:
+        - account
+        - email
+        example: email
+        type: string
+    required:
+    - secret
+    - type
+    type: object
+  user.AuthResp:
+    properties:
+      loginType:
+        type: string
+      userEmail:
+        type: string
+      userName:
+        type: string
+      userToken:
+        type: string
+      userType:
+        type: integer
+    type: object
+  user.UserCreateReq:
+    properties:
+      noCookie:
+        type: boolean
+      userEmail:
+        maxLength: 30
+        type: string
+      userName:
+        maxLength: 30
+        type: string
+      userPhone:
+        maxLength: 20
+        type: string
+      userSecret:
+        maxLength: 20
+        type: string
+    required:
+    - userEmail
+    - userName
+    - userPhone
+    - userSecret
+    type: object
+  user.UserInfoResp:
+    properties:
+      userEmail:
+        type: string
+      userId:
+        type: integer
+      userName:
+        type: string
+      userPhone:
+        type: string
+      userType:
+        type: integer
+    type: object
+  user.UserModifyReq:
+    properties:
+      userEmail:
+        type: string
+      userName:
+        type: string
+      userPhone:
+        type: string
+    required:
+    - userEmail
+    - userName
+    - userPhone
+    type: object
 info:
   contact: {}
 paths:
   /ping:
     get:
       description: test connection
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '''pong'''
+          schema:
+            type: string
+      summary: ping
+      tags:
+      - api
+  /token/login:
+    post:
+      parameters:
+      - description: login information
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.AuthReq'
+      produces:
+      - application/json
       responses:
         "200":
           description: OK
           schema:
+            $ref: '#/definitions/user.AuthResp'
+      summary: login
+      tags:
+      - token
+  /token/logout:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '''logout'''
+          schema:
             type: string
-      summary: ping example
+      summary: logout
+      tags:
+      - token
+  /token/refresh:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.AuthResp'
+      summary: refresh token
+      tags:
+      - token
+  /user/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.UserInfoResp'
+      summary: get user info
+      tags:
+      - user
+    put:
+      parameters:
+      - description: user's new information
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserModifyReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '''success'''
+          schema:
+            type: string
+      summary: modify user info
+      tags:
+      - user
+  /user/register:
+    post:
+      parameters:
+      - description: register information
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.UserCreateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '''success'''
+          schema:
+            type: string
+      summary: register
+      tags:
+      - user
+  /version:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: version
+          schema:
+            type: string
+      summary: get API version
+      tags:
+      - api
+securityDefinitions:
+  BasicAuth:
+    type: basic
 swagger: "2.0"

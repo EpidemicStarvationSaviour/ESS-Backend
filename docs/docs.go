@@ -19,16 +19,311 @@ const docTemplate = `{
         "/ping": {
             "get": {
                 "description": "test connection",
-                "summary": "ping example",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api"
+                ],
+                "summary": "ping",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "'pong'",
                         "schema": {
                             "type": "string"
                         }
                     }
                 }
             }
+        },
+        "/token/login": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "token"
+                ],
+                "summary": "login",
+                "parameters": [
+                    {
+                        "description": "login information",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.AuthReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.AuthResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/token/logout": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "token"
+                ],
+                "summary": "logout",
+                "responses": {
+                    "200": {
+                        "description": "'logout'",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/token/refresh": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "token"
+                ],
+                "summary": "refresh token",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.AuthResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/me": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "get user info",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.UserInfoResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "modify user info",
+                "parameters": [
+                    {
+                        "description": "user's new information",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UserModifyReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "'success'",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/register": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "register",
+                "parameters": [
+                    {
+                        "description": "register information",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UserCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "'success'",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/version": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api"
+                ],
+                "summary": "get API version",
+                "responses": {
+                    "200": {
+                        "description": "version",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "user.AuthReq": {
+            "type": "object",
+            "required": [
+                "secret",
+                "type"
+            ],
+            "properties": {
+                "account": {
+                    "type": "string",
+                    "example": ""
+                },
+                "email": {
+                    "type": "string",
+                    "example": "admin@ess.org"
+                },
+                "secret": {
+                    "type": "string",
+                    "example": "essess"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "account",
+                        "email"
+                    ],
+                    "example": "email"
+                }
+            }
+        },
+        "user.AuthResp": {
+            "type": "object",
+            "properties": {
+                "loginType": {
+                    "type": "string"
+                },
+                "userEmail": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                },
+                "userToken": {
+                    "type": "string"
+                },
+                "userType": {
+                    "type": "integer"
+                }
+            }
+        },
+        "user.UserCreateReq": {
+            "type": "object",
+            "required": [
+                "userEmail",
+                "userName",
+                "userPhone",
+                "userSecret"
+            ],
+            "properties": {
+                "noCookie": {
+                    "type": "boolean"
+                },
+                "userEmail": {
+                    "type": "string",
+                    "maxLength": 30
+                },
+                "userName": {
+                    "type": "string",
+                    "maxLength": 30
+                },
+                "userPhone": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "userSecret": {
+                    "type": "string",
+                    "maxLength": 20
+                }
+            }
+        },
+        "user.UserInfoResp": {
+            "type": "object",
+            "properties": {
+                "userEmail": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
+                },
+                "userName": {
+                    "type": "string"
+                },
+                "userPhone": {
+                    "type": "string"
+                },
+                "userType": {
+                    "type": "integer"
+                }
+            }
+        },
+        "user.UserModifyReq": {
+            "type": "object",
+            "required": [
+                "userEmail",
+                "userName",
+                "userPhone"
+            ],
+            "properties": {
+                "userEmail": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                },
+                "userPhone": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
         }
     }
 }`

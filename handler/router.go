@@ -1,13 +1,14 @@
 package handler
 
 import (
-	"ess/handler/ping"
-	"ess/middlware"
+	api_info "ess/handler/api"
+	"ess/handler/token"
+	"ess/handler/user"
+	"ess/middleware"
 	"ess/utils/setting"
+	"ess/utils/swagger"
 
 	"github.com/gin-gonic/gin"
-
-	docs "ess/docs"
 
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -18,19 +19,30 @@ func InitRouter() *gin.Engine {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
-	docs.SwaggerInfo.BasePath = "/api"
+	swagger.Setup()
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	r.Use(middlware.CorsMiddleware())
+	r.Use(middleware.CorsMiddleware())
 
 	gin.SetMode(setting.ServerSetting.RunMode)
 
 	api := r.Group("/api",
-		middlware.RecoverMiddleware(),
-		middlware.ResponseMiddleware(),
-		middlware.RewriteToken())
+		middleware.RecoverMiddleware(),
+		middleware.ResponseMiddleware(),
+		middleware.RewriteToken())
 
-	api.GET("/ping", ping.Ping)
+	api.GET("/ping", api_info.Ping)
+	api.GET("/version", api_info.Version)
+
+	userMod := api.Group("/user")
+	userMod.GET("/me", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), user.GetInfo)
+	userMod.POST("/register", user.CreateUser)
+	userMod.PUT("/me", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), user.ModifyInfo)
+
+	tokenMod := api.Group("/token")
+	tokenMod.POST("/login", token.Login)
+	tokenMod.GET("/logout", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), token.Logout)
+	tokenMod.POST("/refresh", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), token.Refresh)
 
 	return r
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-func GetStudentToken(user user.User) (string, error) {
+func GetUserToken(user user.User) (string, error) {
 	model := GetClaimFromUser(user)
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, model)
 
