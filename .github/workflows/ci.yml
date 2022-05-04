@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  full_ci:
+    strategy:
+      matrix:
+        go_version: [ 1.18.x ]
+
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go_version }}
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3.1.0
+
+      - name: run tests
+        run: go test -json ./... > test.json
+
+      - name: Annotate tests
+        if: always()
+        uses: guyarb/golang-test-annotations@v0.5.1
+        with:
+          test-results: test.json
