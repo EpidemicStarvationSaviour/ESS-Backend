@@ -42,7 +42,7 @@ func MkDir(src string) error {
 
 // create the whole folder to path if there doesn't exist the src path
 func IsNotExistMkDir(src string) error {
-	if exist := CheckExist(src); exist == false {
+	if exist := CheckExist(src); !exist {
 		return MkDir(src)
 	}
 	return nil
