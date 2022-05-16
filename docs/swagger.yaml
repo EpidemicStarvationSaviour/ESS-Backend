@@ -1,4 +1,9 @@
 definitions:
+  group.GroupInfoResp:
+    properties:
+      count:
+        type: integer
+    type: object
   user.AuthReq:
     properties:
       account:
@@ -84,6 +89,18 @@ definitions:
 info:
   contact: {}
 paths:
+  /group/list:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.GroupInfoResp'
+      summary: get groups I joined
+      tags:
+      - group
   /ping:
     get:
       description: test connection
@@ -201,7 +218,4 @@ paths:
       summary: get API version
       tags:
       - api
-securityDefinitions:
-  BasicAuth:
-    type: basic
 swagger: "2.0"

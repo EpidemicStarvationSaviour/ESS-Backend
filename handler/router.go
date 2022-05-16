@@ -2,6 +2,7 @@ package handler
 
 import (
 	api_info "ess/handler/api"
+	"ess/handler/group"
 	"ess/handler/token"
 	"ess/handler/user"
 	"ess/middleware"
@@ -44,5 +45,7 @@ func InitRouter() *gin.Engine {
 	tokenMod.GET("/logout", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), token.Logout)
 	tokenMod.POST("/refresh", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), token.Refresh)
 
+	groupMod := api.Group("/group")
+	groupMod.GET("/list", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.GetMyGroup)
 	return r
 }

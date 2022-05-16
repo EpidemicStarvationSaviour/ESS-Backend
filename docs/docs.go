@@ -16,6 +16,25 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/group/list": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "get groups I joined",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/group.GroupInfoResp"
+                        }
+                    }
+                }
+            }
+        },
         "/ping": {
             "get": {
                 "description": "test connection",
@@ -202,6 +221,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "group.GroupInfoResp": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
         "user.AuthReq": {
             "type": "object",
             "required": [
@@ -319,11 +346,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "BasicAuth": {
-            "type": "basic"
         }
     }
 }`

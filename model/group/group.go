@@ -12,3 +12,13 @@ type Group struct {
 	Status      string
 	Seen        bool
 }
+
+type GroupInfoReq struct {
+	Type     int `json:"type"`
+	PageNum  int `json:"page_num"`
+	PageSize int `json:"page_size"`
+}
+
+type GroupInfoResp struct {
+	Count int `json:"count"`
+}
