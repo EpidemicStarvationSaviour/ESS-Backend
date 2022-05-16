@@ -1,18 +1,22 @@
 package user_service
 
 import (
+	"ess/model/address"
 	"ess/model/user"
+	"ess/service/address_service"
 	"ess/utils/cache"
 	"ess/utils/db"
 	"ess/utils/logging"
 	"ess/utils/setting"
 	"regexp"
+
+	"github.com/jinzhu/copier"
 )
 
-func QueryUserByEmail(email string) user.User {
-	// email to uid
-	uid := cache.GetOrCreate(cache.GetKey(cache.EmailToId, email), func() interface{} {
-		return Email2Id(email)
+func QueryUserByPhone(phone string) user.User {
+	// phone to uid
+	uid := cache.GetOrCreate(cache.GetKey(cache.PhoneToId, phone), func() interface{} {
+		return Phone2Id(phone)
 	}).(int)
 
 	res := cache.GetOrCreate(cache.GetKey(cache.UserInfo, uid), func() interface{} {
@@ -52,10 +56,9 @@ func QueryUserByName(name string) user.User {
 func QueryUserById(uid int) user.User {
 	if uid == setting.AdminSetting.UserId {
 		return user.User{
-			UserId:    setting.AdminSetting.UserId,
-			UserName:  setting.AdminSetting.Name,
-			UserEmail: setting.AdminSetting.Email,
-			UserType:  user.SysAdmin,
+			UserId:   setting.AdminSetting.UserId,
+			UserName: setting.AdminSetting.Name,
+			UserRole: user.SysAdmin,
 		}
 	}
 	res := cache.GetOrCreate(cache.GetKey(cache.UserInfo, uid), func() interface{} {
@@ -71,50 +74,42 @@ func QueryUserById(uid int) user.User {
 	return *res
 }
 
-func CreateUser(us *user.User) error {
-	if err := db.MysqlDB.Create(us).Error; err != nil {
-		return err
-	}
-	return nil
+func CreateUser(user *user.User) error {
+	return db.MysqlDB.Create(user).Error
 }
 
-func UpdateUser(user user.User) error {
-	if err := db.MysqlDB.Select("*").Updates(&user).Error; err != nil {
-		return err
-	}
-	return nil
+func UpdateUser(user *user.User) error {
+	return db.MysqlDB.Model(user).Updates(user).Error
 }
 
 func CleanUserCache(user user.User) {
 	cache.Remove(cache.GetKey(cache.UserInfo, user.UserId))
-	cache.Remove(cache.GetKey(cache.EmailToId, user.UserEmail))
 }
 
-func Email2Id(email string) int {
-	user := user.User{}
-	if err := db.MysqlDB.First(&user, "user_email = ?", email).Error; err != nil {
+func Phone2Id(phone string) int {
+	usr := user.User{}
+	if err := db.MysqlDB.Where(&user.User{UserPhone: phone}).First(&usr).Error; err != nil {
 		return -1
 	}
-	return user.UserId
+	return usr.UserId
 }
 
 func Name2Id(name string) int {
-	user := user.User{}
-	if err := db.MysqlDB.First(&user, "user_name = ?", name).Error; err != nil {
+	usr := user.User{}
+	if err := db.MysqlDB.Where(&user.User{UserName: name}).First(&usr).Error; err != nil {
 		return -1
 	}
-	return user.UserId
+	return usr.UserId
 }
 
 func GetUserById(uid int) (*user.User, error) {
-	user := user.User{}
-	if err := db.MysqlDB.First(&user, "user_id = ?", uid).Error; err != nil {
+	user := user.User{UserId: uid}
+	if err := db.MysqlDB.First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-const EmailRegex = "^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$"
 const PhoneRegex = "^1(3\\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\\d|9[0-35-9])\\d{8}$"
 
 // 长度 6-18 字母开头 只能包含数字 字母下划线
@@ -123,30 +118,64 @@ const PasswordRegex = "^[a-zA-Z]\\w{5,17}$"
 // 4-16 位字母,数字,汉字,下划线
 const NameRegex = "^([\u4e00-\u9fa5]{2,4})|([A-Za-z0-9_]{4,16})|([a-zA-Z0-9_\u4e00-\u9fa5]{3,16})$"
 
-func ValidUser(user user.UserCreateReq) bool {
-	if len(user.UserName) == 0 || len(user.UserEmail) == 0 || len(user.UserPhone) == 0 || len(user.UserSecret) == 0 {
-		return false
+func ValidUser(user user.UserCreateReq) (*address.Address, bool) {
+	if len(user.UserName) == 0 || len(user.UserPhone) == 0 || len(user.UserSecret) == 0 {
+		return nil, false
 	}
 
 	if m, _ := regexp.MatchString(NameRegex, user.UserName); !m {
 		logging.InfoF("用户名格式错误 name:%s\n", user.UserName)
-		return false
+		return nil, false
 	}
 
 	if m, _ := regexp.MatchString(PhoneRegex, user.UserPhone); !m {
 		logging.InfoF("手机号格式错误 phoneNum:%s\n", user.UserPhone)
-		return false
-	}
-
-	if m, _ := regexp.MatchString(EmailRegex, user.UserEmail); !m {
-		logging.InfoF("email 格式错误 email:%s\n", user.UserEmail)
-		return false
+		return nil, false
 	}
 
 	if m, _ := regexp.MatchString(PasswordRegex, user.UserSecret); !m {
 		logging.InfoF("密码格式错误 secret:%s\n", user.UserSecret)
-		return false
+		return nil, false
 	}
-	return true
 
+	var addr address.Address
+	copier.Copy(&addr, &user.UserAddress)
+	addr.AddressUserId = 0 // placeholder
+	// TODO(TO/GA): amap
+	addr.AddressLat = 0
+	addr.AddressLng = 0
+
+	return &addr, true
+}
+
+func CreateUserWithAddress(user *user.User, addr *address.Address) error {
+	tx := db.MysqlDB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return err
+	}
+
+	if err := address_service.CreateAddress(addr); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	user.UserDefaultAddressId = addr.AddressId
+	if err := CreateUser(user); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	addr.AddressUserId = user.UserId
+	if err := address_service.UpdateAddress(addr); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }

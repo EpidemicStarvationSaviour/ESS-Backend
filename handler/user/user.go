@@ -11,6 +11,7 @@ import (
 	"ess/utils/setting"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 )
 
 // @Summary get user info
@@ -26,7 +27,6 @@ func GetInfo(c *gin.Context) {
 		sysAdminResp := user.UserInfoResp{
 			ID:    setting.AdminSetting.UserId,
 			Name:  setting.AdminSetting.Name,
-			Email: setting.AdminSetting.Email,
 			Type:  user.SysAdmin,
 			Phone: setting.AdminSetting.Phone,
 		}
@@ -45,8 +45,7 @@ func GetInfo(c *gin.Context) {
 	userResp := user.UserInfoResp{
 		ID:    userRec.UserId,
 		Name:  userRec.UserName,
-		Email: userRec.UserEmail,
-		Type:  userRec.UserType,
+		Type:  userRec.UserRole,
 		Phone: userRec.UserPhone,
 	}
 	c.Set(define.ESSRESPONSE, response.JSONData(userResp))
@@ -87,10 +86,9 @@ func ModifyInfo(c *gin.Context) {
 	}
 
 	userRec.UserName = req.UserName
-	userRec.UserEmail = req.UserEmail
 	userRec.UserPhone = req.UserPhone
 
-	err := user_service.UpdateUser(userRec)
+	err := user_service.UpdateUser(&userRec)
 
 	if err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_UPDATE_FAIL))
@@ -107,49 +105,44 @@ func ModifyInfo(c *gin.Context) {
 // @Tags    user
 // @Produce json
 // @Param data body user.UserCreateReq true "register information"
-// @Success 200 {string} string "'success'"
+// @Success 200 {object} user.UserCreateResp
 // @Router  /user/register [post]
 func CreateUser(c *gin.Context) {
-	var userCreate user.UserCreateReq
-	if err := c.ShouldBind(&userCreate); err != nil {
+	var req user.UserCreateReq
+	if err := c.ShouldBind(&req); err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 		c.Abort()
 		return
 	}
 
-	if !user_service.ValidUser(userCreate) {
+	addr, valid := user_service.ValidUser(req)
+	if !valid {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_NOT_VALID_USER_PARAM))
 		c.Abort()
 		return
 	}
 
-	userCreate.UserSecret = crypto.Password2Secret(userCreate.UserSecret)
+	req.UserSecret = crypto.Password2Secret(req.UserSecret)
 
-	us := user.User{
-		UserName:   userCreate.UserName,
-		UserPhone:  userCreate.UserPhone,
-		UserEmail:  userCreate.UserEmail,
-		UserSecret: userCreate.UserSecret,
-		UserType:   user.EndUser,
-	}
+	var usr user.User
+	copier.Copy(&usr, &req)
 
-	if err := user_service.CreateUser(&us); err != nil {
+	if err := user_service.CreateUserWithAddress(&usr, addr); err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg(err.Error()))
 		c.Abort()
 		return
 	}
 
-	logging.InfoF("create a new user: %v\n", userCreate)
+	logging.InfoF("create a new user: %+v with address:%+v\n", usr, *addr)
 
-	jwt, err := authUtils.GetUserToken(us)
+	jwt, err := authUtils.GetUserToken(usr)
 	if err != nil {
-		logging.ErrorF("generate token error for user:%+v\n", us)
+		logging.ErrorF("generate token error for user:%+v\n", usr)
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_TOKEN_GENERATE_FAIL))
 		c.Abort()
 	}
-	if !userCreate.NoCookie {
-		c.SetCookie(define.ESSTOKEN, "Bearer "+jwt, int(setting.ServerSetting.JwtExpireTime.Seconds()), "/", "", false, true)
-	}
+	c.SetCookie(define.ESSTOKEN, "Bearer "+jwt, int(setting.ServerSetting.JwtExpireTime.Seconds()), "/", "", false, true)
 
-	c.Set(define.ESSRESPONSE, response.JSONData("success"))
+	resp := user.UserCreateResp{UserId: usr.UserId}
+	c.Set(define.ESSRESPONSE, response.JSONData(resp))
 }

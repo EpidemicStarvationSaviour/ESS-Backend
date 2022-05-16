@@ -15,14 +15,14 @@ type Policy interface {
 	SysAdminOnly() bool
 	GetId() int
 	GetName() string
-	GetEmail() string
+	GetPhone() string
 	ConvertToUser() user.User
 }
 
 type Payload struct {
 	Name   string    `json:"name"`
 	UserId int       `json:"user_id"`
-	Email  string    `json:"email"`
+	Phone  string    `json:"phone"`
 	Role   user.Role `json:"role"`
 	jwt.StandardClaims
 }
@@ -51,16 +51,15 @@ func (p *Payload) GetName() string {
 	return p.Name
 }
 
-func (p *Payload) GetEmail() string {
-	return p.Email
+func (p *Payload) GetPhone() string {
+	return p.Phone
 }
 
 func (p *Payload) ConvertToUser() user.User {
 	return user.User{
-		UserEmail: p.Email,
-		UserType:  p.Role,
-		UserName:  p.Name,
-		UserId:    p.UserId,
+		UserRole: p.Role,
+		UserName: p.Name,
+		UserId:   p.UserId,
 	}
 }
 
@@ -72,8 +71,7 @@ func GetClaimFromUser(user user.User) *Payload {
 	return &Payload{
 		Name:   user.UserName,
 		UserId: user.UserId,
-		Email:  user.UserEmail,
-		Role:   user.UserType,
+		Role:   user.UserRole,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),
 			Issuer:    setting.SecretSetting.JwtIssuer,
@@ -89,7 +87,7 @@ func GetClaimFromSysAdmin() *Payload {
 	return &Payload{
 		Name:   setting.AdminSetting.Name,
 		UserId: setting.AdminSetting.UserId,
-		Email:  setting.AdminSetting.Email,
+		Phone:  setting.AdminSetting.Phone,
 		Role:   user.SysAdmin,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),

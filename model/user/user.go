@@ -9,9 +9,8 @@ import (
 type User struct {
 	UserId               int             `gorm:"primaryKey"`
 	UserName             string          `gorm:"uniqueIndex;size:30"`
-	UserEmail            string          `gorm:"uniqueIndex;size:30"` // TODO(TO/GA): delete it
-	UserType             Role            `gorm:"not null"`
-	UserPhone            string          `gorm:"size:20;not null"`
+	UserRole             Role            `gorm:"not null"`
+	UserPhone            string          `gorm:"uniqueIndex;size:20;not null"`
 	UserSecret           string          `gorm:"size:63;not null"`
 	UserDefaultAddress   address.Address `gorm:"foreignKey:UserDefaultAddressId"`
 	UserDefaultAddressId int             `gorm:"not null"`
@@ -21,26 +20,35 @@ type User struct {
 	UserDeleted          gorm.DeletedAt
 }
 
+type UserCreateReq struct {
+	UserPhone   string               `json:"user_phone" form:"user_phone" binding:"required,max=20" example:"13800138000"`
+	UserSecret  string               `json:"userSecret" form:"userSecret" binding:"required,max=20"`
+	UserRole    Role                 `json:"user_role" form:"user_role" binding:"required" example:"1"`
+	UserName    string               `json:"user_secret" form:"user_secret" binding:"required,max=30"`
+	UserAddress UserCreateReqAddress `json:"user_address" form:"user_address" binding:"required"`
+}
+
+type UserCreateReqAddress struct {
+	AddressProvince string `json:"province" form:"province" binding:"required"`
+	AddressCity     string `json:"city" form:"city" binding:"required"`
+	AddressArea     string `json:"area" form:"area" binding:"required"`
+	AddressDetail   string `json:"detail" form:"detail" binding:"required"`
+}
+
+type UserCreateResp struct {
+	UserId int `json:"id" form:"id"`
+}
+
 type UserInfoResp struct {
 	ID    int    `json:"userId"`
 	Name  string `json:"userName"`
-	Email string `json:"userEmail"`
 	Type  Role   `json:"userType"`
 	Phone string `json:"userPhone"`
 }
 
 type UserModifyReq struct {
 	UserName  string `json:"userName" binding:"required"`
-	UserEmail string `json:"userEmail" binding:"required"`
 	UserPhone string `json:"userPhone" binding:"required"`
-}
-
-type UserCreateReq struct {
-	UserName   string `json:"userName" form:"userName" binding:"required,max=30"`
-	UserEmail  string `json:"userEmail" form:"userEmail" binding:"required,max=30"`
-	UserSecret string `json:"userSecret" form:"userSecret" binding:"required,max=20"`
-	UserPhone  string `json:"userPhone" form:"userPhone" binding:"required,max=20"`
-	NoCookie   bool   `json:"noCookie" form:"noCookie"`
 }
 
 type UserDeleteReq struct {
@@ -53,18 +61,17 @@ type UserChangeRoleReq struct {
 }
 
 type AuthReq struct {
-	Type    string `json:"type" example:"email" binding:"required,oneof=account email"`
-	Account string `json:"account" example:"" `
-	Email   string `json:"email" example:"admin@ess.org" form:"email"`
-	Secret  string `json:"secret" example:"essess" form:"secret" binding:"required"`
+	Type    string `json:"type" form:"type" example:"name" binding:"required,oneof=name phone"`
+	Account string `json:"account" form:"account" binding:"required"`
+	Secret  string `json:"password" form:"password" binding:"required"`
 }
 
 type AuthResp struct {
-	UserName  string `json:"userName"`
-	UserEmail string `json:"userEmail"`
-	UserType  Role   `json:"userType"`
-	UserToken string `json:"userToken"`
-	LoginType string `json:"loginType"`
+	UserPhone string `json:"user_phone" form:"user_phone"`
+	UserName  string `json:"user_name" form:"user_name"`
+	UserRole  Role   `json:"user_role" form:"user_role"`
+	UserToken string `json:"user_token" form:"user_token"`
+	LoginType string `json:"login_type" form:"login_type"`
 }
 
 type TokenAuth struct {

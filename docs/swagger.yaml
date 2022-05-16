@@ -7,63 +7,80 @@ definitions:
   user.AuthReq:
     properties:
       account:
-        example: ""
         type: string
-      email:
-        example: admin@ess.org
-        type: string
-      secret:
-        example: essess
+      password:
         type: string
       type:
         enum:
-        - account
-        - email
-        example: email
+        - name
+        - phone
+        example: name
         type: string
     required:
-    - secret
+    - account
+    - password
     - type
     type: object
   user.AuthResp:
     properties:
-      loginType:
+      login_type:
         type: string
-      userEmail:
+      user_name:
         type: string
-      userName:
+      user_phone:
         type: string
-      userToken:
-        type: string
-      userType:
+      user_role:
         type: integer
+      user_token:
+        type: string
     type: object
   user.UserCreateReq:
     properties:
-      noCookie:
-        type: boolean
-      userEmail:
-        maxLength: 30
-        type: string
-      userName:
-        maxLength: 30
-        type: string
-      userPhone:
+      user_address:
+        $ref: '#/definitions/user.UserCreateReqAddress'
+      user_phone:
+        example: "13800138000"
         maxLength: 20
+        type: string
+      user_role:
+        example: 1
+        type: integer
+      user_secret:
+        maxLength: 30
         type: string
       userSecret:
         maxLength: 20
         type: string
     required:
-    - userEmail
-    - userName
-    - userPhone
     - userSecret
+    - user_address
+    - user_phone
+    - user_role
+    - user_secret
+    type: object
+  user.UserCreateReqAddress:
+    properties:
+      area:
+        type: string
+      city:
+        type: string
+      detail:
+        type: string
+      province:
+        type: string
+    required:
+    - area
+    - city
+    - detail
+    - province
+    type: object
+  user.UserCreateResp:
+    properties:
+      id:
+        type: integer
     type: object
   user.UserInfoResp:
     properties:
-      userEmail:
-        type: string
       userId:
         type: integer
       userName:
@@ -75,14 +92,11 @@ definitions:
     type: object
   user.UserModifyReq:
     properties:
-      userEmail:
-        type: string
       userName:
         type: string
       userPhone:
         type: string
     required:
-    - userEmail
     - userName
     - userPhone
     type: object
@@ -200,9 +214,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: '''success'''
+          description: OK
           schema:
-            type: string
+            $ref: '#/definitions/user.UserCreateResp'
       summary: register
       tags:
       - user

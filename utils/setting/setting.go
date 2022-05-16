@@ -50,7 +50,6 @@ type Database struct {
 var DatabaseSetting = &Database{}
 
 type Admin struct {
-	Email    string
 	Password string
 	UserId   int
 	Name     string

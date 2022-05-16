@@ -180,9 +180,9 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "'success'",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/user.UserCreateResp"
                         }
                     }
                 }
@@ -220,88 +220,113 @@
         "user.AuthReq": {
             "type": "object",
             "required": [
-                "secret",
+                "account",
+                "password",
                 "type"
             ],
             "properties": {
                 "account": {
-                    "type": "string",
-                    "example": ""
+                    "type": "string"
                 },
-                "email": {
-                    "type": "string",
-                    "example": "admin@ess.org"
-                },
-                "secret": {
-                    "type": "string",
-                    "example": "essess"
+                "password": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string",
                     "enum": [
-                        "account",
-                        "email"
+                        "name",
+                        "phone"
                     ],
-                    "example": "email"
+                    "example": "name"
                 }
             }
         },
         "user.AuthResp": {
             "type": "object",
             "properties": {
-                "loginType": {
+                "login_type": {
                     "type": "string"
                 },
-                "userEmail": {
+                "user_name": {
                     "type": "string"
                 },
-                "userName": {
+                "user_phone": {
                     "type": "string"
                 },
-                "userToken": {
-                    "type": "string"
-                },
-                "userType": {
+                "user_role": {
                     "type": "integer"
+                },
+                "user_token": {
+                    "type": "string"
                 }
             }
         },
         "user.UserCreateReq": {
             "type": "object",
             "required": [
-                "userEmail",
-                "userName",
-                "userPhone",
-                "userSecret"
+                "userSecret",
+                "user_address",
+                "user_phone",
+                "user_role",
+                "user_secret"
             ],
             "properties": {
-                "noCookie": {
-                    "type": "boolean"
-                },
-                "userEmail": {
-                    "type": "string",
-                    "maxLength": 30
-                },
-                "userName": {
-                    "type": "string",
-                    "maxLength": 30
-                },
-                "userPhone": {
-                    "type": "string",
-                    "maxLength": 20
-                },
                 "userSecret": {
                     "type": "string",
                     "maxLength": 20
+                },
+                "user_address": {
+                    "$ref": "#/definitions/user.UserCreateReqAddress"
+                },
+                "user_phone": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "example": "13800138000"
+                },
+                "user_role": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "user_secret": {
+                    "type": "string",
+                    "maxLength": 30
+                }
+            }
+        },
+        "user.UserCreateReqAddress": {
+            "type": "object",
+            "required": [
+                "area",
+                "city",
+                "detail",
+                "province"
+            ],
+            "properties": {
+                "area": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.UserCreateResp": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
                 }
             }
         },
         "user.UserInfoResp": {
             "type": "object",
             "properties": {
-                "userEmail": {
-                    "type": "string"
-                },
                 "userId": {
                     "type": "integer"
                 },
@@ -319,14 +344,10 @@
         "user.UserModifyReq": {
             "type": "object",
             "required": [
-                "userEmail",
                 "userName",
                 "userPhone"
             ],
             "properties": {
-                "userEmail": {
-                    "type": "string"
-                },
                 "userName": {
                     "type": "string"
                 },

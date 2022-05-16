@@ -2,6 +2,7 @@ package main
 
 import (
 	"ess/handler"
+	"ess/utils/cache"
 	"ess/utils/db"
 	"ess/utils/logging"
 	"ess/utils/setting"
@@ -15,6 +16,7 @@ func main() {
 	// so we rename `init` to `Setup` and call them in our needed orders.
 
 	setting.Setup()
+	cache.Setup()
 	logging.Setup()
 	db.Setup()
 

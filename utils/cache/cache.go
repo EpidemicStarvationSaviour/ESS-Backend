@@ -32,6 +32,7 @@ func Remove(key string) {
 // accept a key and a function to return data (interface), if there isn't key-value in cache, it will call the
 // function to get data and store it
 func GetOrCreate(key string, f func() interface{}) interface{} {
+	log.Printf("fuck: %v", key)
 	res, exist := cache.Get(key)
 
 	if !exist {

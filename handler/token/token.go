@@ -20,24 +20,15 @@ import (
 // @Success 200 {object} user.AuthResp
 // @Router  /token/login [post]
 func Login(c *gin.Context) {
-	var userAuth user.AuthReq
-	if err := c.ShouldBind(&userAuth); err != nil {
+	var req user.AuthReq
+	if err := c.ShouldBind(&req); err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 		c.Abort()
 		return
 	}
 
-	if (userAuth.Type == "email" && len(userAuth.Email) == 0) || userAuth.Type == "account" && len(userAuth.Account) == 0 {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
-		c.Abort()
-		return
-	}
-	loginStatus := false
-	defer c.Set(define.ESSLOGINSTATUS, loginStatus)
-
-	if userAuth.Email == setting.AdminSetting.Email {
-		if userAuth.Secret == setting.AdminSetting.Password {
-			loginStatus = true //nolint
+	if (req.Type == "name" && req.Account == setting.AdminSetting.Name) || (req.Type == "phone" && req.Account == setting.AdminSetting.Phone) {
+		if req.Secret == setting.AdminSetting.Password {
 			adminToken, err := authUtils.GetSysAdminToken()
 			if err != nil {
 				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_TOKEN_GENERATE_FAIL))
@@ -46,10 +37,9 @@ func Login(c *gin.Context) {
 			}
 			c.SetCookie(define.ESSTOKEN, "Bearer "+adminToken, int(setting.ServerSetting.JwtExpireTime.Seconds()), "/", "", false, true)
 			c.Set(define.ESSRESPONSE, response.JSONData(user_service.NewLoginResp(user.User{
-				UserEmail: setting.AdminSetting.Email,
-				UserName:  setting.AdminSetting.Name,
-				UserType:  user.SysAdmin,
-			}, adminToken, userAuth.Type)))
+				UserName: setting.AdminSetting.Name,
+				UserRole: user.SysAdmin,
+			}, adminToken, req.Type)))
 			return
 		} else {
 			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_NOT_ADMIN))
@@ -58,23 +48,20 @@ func Login(c *gin.Context) {
 		}
 	}
 
-	secret := crypto.Password2Secret(userAuth.Secret)
-
+	secret := crypto.Password2Secret(req.Secret)
 	var queryUser user.User
-	if userAuth.Type == "email" {
-		queryUser = user_service.QueryUserByEmail(userAuth.Email)
+	if req.Type == "phone" {
+		queryUser = user_service.QueryUserByPhone(req.Account)
 	} else {
-		queryUser = user_service.QueryUserByName(userAuth.Account)
-
+		queryUser = user_service.QueryUserByName(req.Account)
 	}
 
-	if queryUser.UserId == 0 { // not exist
+	if queryUser.UserId <= 0 { // not exist
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_USERID))
 		return
 	}
 	// check secret
 	if secret == queryUser.UserSecret {
-		loginStatus = true //nolint
 		jwt, err := authUtils.GetUserToken(queryUser)
 		if err != nil {
 			logging.ErrorF("generate token error for user:%+v\n", queryUser)
@@ -82,7 +69,7 @@ func Login(c *gin.Context) {
 			c.Abort()
 		} else {
 			c.SetCookie(define.ESSTOKEN, "Bearer "+jwt, int(setting.ServerSetting.JwtExpireTime.Seconds()), "/", "", false, true)
-			c.Set(define.ESSRESPONSE, response.JSONData(user_service.NewLoginResp(queryUser, jwt, userAuth.Type)))
+			c.Set(define.ESSRESPONSE, response.JSONData(user_service.NewLoginResp(queryUser, jwt, req.Type)))
 		}
 	} else {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PASSWORD))
