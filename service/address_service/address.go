@@ -12,3 +12,9 @@ func CreateAddress(addr *address.Address) error {
 func UpdateAddress(addr *address.Address) error {
 	return db.MysqlDB.Model(addr).Updates(addr).Error
 }
+
+func QueryAddressesByUserId(uid int) ([]address.Address, error) {
+	var addresses []address.Address
+	err := db.MysqlDB.Where(&address.Address{AddressUserId: uid}).Find(&addresses).Error
+	return addresses, err
+}

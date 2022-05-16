@@ -22,9 +22,9 @@ type User struct {
 
 type UserCreateReq struct {
 	UserPhone   string               `json:"user_phone" form:"user_phone" binding:"required,max=20" example:"13800138000"`
-	UserSecret  string               `json:"userSecret" form:"userSecret" binding:"required,max=20"`
+	UserSecret  string               `json:"user_secret" form:"user_secret" binding:"required,max=20"`
 	UserRole    Role                 `json:"user_role" form:"user_role" binding:"required" example:"1"`
-	UserName    string               `json:"user_secret" form:"user_secret" binding:"required,max=30"`
+	UserName    string               `json:"user_name" form:"user_name" binding:"required,max=30"`
 	UserAddress UserCreateReqAddress `json:"user_address" form:"user_address" binding:"required"`
 }
 
@@ -40,10 +40,22 @@ type UserCreateResp struct {
 }
 
 type UserInfoResp struct {
-	ID    int    `json:"userId"`
-	Name  string `json:"userName"`
-	Type  Role   `json:"userType"`
-	Phone string `json:"userPhone"`
+	UserId      int                   `json:"user_id"`
+	UserPhone   string                `json:"user_phone"`
+	UserName    string                `json:"user_name"`
+	UserRole    Role                  `json:"user_role"`
+	UserAddress []UserInfoRespAddress `json:"user_address"`
+}
+
+type UserInfoRespAddress struct {
+	AddressId        int     `json:"id"`
+	AddressLat       float64 `json:"lat"`
+	AddressLng       float64 `json:"lng"`
+	AddressProvince  string  `json:"province"`
+	AddressCity      string  `json:"city"`
+	AddressArea      string  `json:"area"`
+	AddressDetail    string  `json:"detail"`
+	IsDefaultAddress bool    `json:"is_default"`
 }
 
 type UserModifyReq struct {

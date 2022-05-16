@@ -3,6 +3,7 @@ package user
 import (
 	"ess/define"
 	"ess/model/user"
+	"ess/service/address_service"
 	"ess/service/user_service"
 	"ess/utils/authUtils"
 	"ess/utils/crypto"
@@ -25,10 +26,10 @@ func GetInfo(c *gin.Context) {
 
 	if policy.SysAdminOnly() {
 		sysAdminResp := user.UserInfoResp{
-			ID:    setting.AdminSetting.UserId,
-			Name:  setting.AdminSetting.Name,
-			Type:  user.SysAdmin,
-			Phone: setting.AdminSetting.Phone,
+			UserId:    setting.AdminSetting.UserId,
+			UserName:  setting.AdminSetting.Name,
+			UserRole:  user.SysAdmin,
+			UserPhone: setting.AdminSetting.Phone,
 		}
 		c.Set(define.ESSRESPONSE, response.JSONData(sysAdminResp))
 		return
@@ -42,13 +43,24 @@ func GetInfo(c *gin.Context) {
 		return
 	}
 
-	userResp := user.UserInfoResp{
-		ID:    userRec.UserId,
-		Name:  userRec.UserName,
-		Type:  userRec.UserRole,
-		Phone: userRec.UserPhone,
+	addr, err := address_service.QueryAddressesByUserId(userID)
+	if err != nil {
+		logging.ErrorF("failed to retrieve addresses (uid: %v): %+v\n", userID, err)
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+		c.Abort()
+		return
 	}
-	c.Set(define.ESSRESPONSE, response.JSONData(userResp))
+
+	resp := user.UserInfoResp{}
+	copier.Copy(&resp, &userRec)
+	for _, v := range addr {
+		var address user.UserInfoRespAddress
+		copier.Copy(&address, &v)
+		address.IsDefaultAddress = (v.AddressId == userRec.UserDefaultAddressId)
+		resp.UserAddress = append(resp.UserAddress, address)
+	}
+
+	c.Set(define.ESSRESPONSE, response.JSONData(resp))
 }
 
 // @Summary modify user info
