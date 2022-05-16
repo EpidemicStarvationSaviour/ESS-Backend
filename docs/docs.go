@@ -258,6 +258,25 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/workinfo": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "dashboard",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.UserDashboardResp"
+                        }
+                    }
+                }
+            }
+        },
         "/version": {
             "get": {
                 "produces": [
@@ -436,6 +455,23 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "user.UserDashboardResp": {
+            "type": "object",
+            "properties": {
+                "finished_groups": {
+                    "type": "integer"
+                },
+                "total_commodities": {
+                    "type": "integer"
+                },
+                "total_groups": {
+                    "type": "integer"
+                },
+                "total_users": {
                     "type": "integer"
                 }
             }

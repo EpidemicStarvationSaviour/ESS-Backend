@@ -110,6 +110,17 @@ definitions:
       id:
         type: integer
     type: object
+  user.UserDashboardResp:
+    properties:
+      finished_groups:
+        type: integer
+      total_commodities:
+        type: integer
+      total_groups:
+        type: integer
+      total_users:
+        type: integer
+    type: object
   user.UserInfoResp:
     properties:
       user_address:
@@ -310,6 +321,18 @@ paths:
           schema:
             $ref: '#/definitions/user.UserCreateResp'
       summary: register
+      tags:
+      - user
+  /user/workinfo:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.UserDashboardResp'
+      summary: dashboard
       tags:
       - user
   /version:

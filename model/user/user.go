@@ -69,9 +69,11 @@ type UserDeleteReq struct {
 	ID int `json:"id" binding:"required"`
 }
 
-type UserChangeRoleReq struct {
-	ID   int  `json:"userId" binding:"required"`
-	Type Role `json:"userType" binding:"required"`
+type UserDashboardResp struct {
+	TotalUsers       int64 `json:"total_users"`
+	TotalGroups      int64 `json:"total_groups"`
+	TotalCommodities int64 `json:"total_commodities"`
+	FinishedGroups   int64 `json:"finished_groups"`
 }
 
 type AuthReq struct {

@@ -42,6 +42,7 @@ func InitRouter() *gin.Engine {
 	userMod.PUT("/me", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), user.ModifyInfo)
 	userMod.POST("/address", middleware.AuthenticationMiddleware(), middleware.PurchaserOnly(), address.CreateAddr)
 	userMod.DELETE("/address", middleware.AuthenticationMiddleware(), middleware.PurchaserOnly(), address.DeleteAddr)
+	userMod.GET("/workinfo", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), user.GetDashboard)
 
 	tokenMod := api.Group("/token")
 	tokenMod.POST("/login", token.Login)
