@@ -1,14 +1,25 @@
 package group
 
+import (
+	"ess/model/address"
+	"ess/model/category"
+	"ess/model/user"
+)
+
 type Group struct {
-	GroupId     int    `gorm:"primaryKey"`
-	GroupName   string `gorm:"uniqueIndex;size:100"`
-	CreatorId   int
-	Description string `gorm:"size:200"`
-	Remark      string `gorm:"size:200"`
-	Aid         int
-	Cids        int
-	RiderId     int
-	Status      string
-	Seen        bool
+	GroupId          int                 `gorm:"primaryKey"`
+	GroupName        string              `gorm:"size:63;not null"`
+	GroupDescription string              `gorm:"size:255;not null"`
+	GroupRemark      string              `gorm:"size:255;not null"`
+	GroupCreator     user.User           `gorm:"foreignKey:GroupCreatorId"`
+	GroupCreatorId   int                 `gorm:"not null"`
+	GroupAddress     address.Address     `gorm:"foreignKey:GroupAddressId"`
+	GroupAddressId   int                 `gorm:"not null"`
+	GroupCategories  []category.Category `gorm:"many2many:group_category;"`
+	GroupRider       user.User           `gorm:"foreignKey:GroupRiderId"`
+	GroupRiderId     int                 `gorm:""`
+	GroupStatus      Status              `gorm:"not null;default:1"`
+	GroupSeenByRider bool                `gorm:"not null;default:false"`
+	GroupCreatedAt   int64               `gorm:"autoCreateTime"`
+	GroupUpdatedAt   int64               `gorm:"autoUpdateTime"`
 }

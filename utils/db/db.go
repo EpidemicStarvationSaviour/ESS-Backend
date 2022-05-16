@@ -1,6 +1,12 @@
 package db
 
 import (
+	"ess/model/address"
+	"ess/model/category"
+	"ess/model/group"
+	"ess/model/item"
+	"ess/model/order"
+	"ess/model/route"
 	"ess/model/user"
 	"ess/utils/logging"
 	"ess/utils/setting"
@@ -45,8 +51,26 @@ func Setup() {
 	// MysqlDB.Debug()
 
 	// auto migrate  it can't handle the dependency relations, so you need handle it by yourself
+	if err = MysqlDB.AutoMigrate(&address.Address{}); err != nil {
+		logging.Fatal("failed to auto migrate address.Address: ", err)
+	}
 	if err = MysqlDB.AutoMigrate(&user.User{}); err != nil {
 		logging.Fatal("failed to auto migrate user.User: ", err)
+	}
+	if err = MysqlDB.AutoMigrate(&category.Category{}); err != nil {
+		logging.Fatal("failed to auto migrate category.Category: ", err)
+	}
+	if err = MysqlDB.AutoMigrate(&item.Item{}); err != nil {
+		logging.Fatal("failed to auto migrate item.Item: ", err)
+	}
+	if err = MysqlDB.AutoMigrate(&group.Group{}); err != nil {
+		logging.Fatal("failed to auto migrate group.Group: ", err)
+	}
+	if err = MysqlDB.AutoMigrate(&order.Order{}); err != nil {
+		logging.Fatal("failed to auto migrate order.Order: ", err)
+	}
+	if err = MysqlDB.AutoMigrate(&route.Route{}); err != nil {
+		logging.Fatal("failed to auto migrate route.Route: ", err)
 	}
 
 	logging.InfoF("[server] database %s@tcp(%s)/%s connected", dbUser, host, dbName)
