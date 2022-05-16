@@ -97,12 +97,32 @@ func ModifyInfo(c *gin.Context) {
 		return
 	}
 
-	userRec.UserName = req.UserName
-	userRec.UserPhone = req.UserPhone
+	if req.UserRole == user.SysAdmin || req.UserRole == user.Admin {
+		c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("不允许提权"))
+		c.Abort()
+		return
+	}
+
+	if req.UserDefaultAddressId != 0 {
+		valid, err := address_service.CheckAddressByUserId(req.UserDefaultAddressId, userID)
+		if err != nil {
+			logging.ErrorF("failed to check address owner(aid: %+v, uid: %+v): %+v\n", req.UserDefaultAddressId, userID, err)
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+			c.Abort()
+			return
+		}
+		if !valid {
+			c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("默认地址不存在"))
+			c.Abort()
+			return
+		}
+	}
+
+	copier.Copy(&userRec, &req)
 
 	err := user_service.UpdateUser(&userRec)
-
 	if err != nil {
+		logging.ErrorF("failed to retrieve addresses (uid: %v): %+v\n", userID, err)
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_UPDATE_FAIL))
 		c.Abort()
 		return
@@ -140,6 +160,7 @@ func CreateUser(c *gin.Context) {
 	copier.Copy(&usr, &req)
 
 	if err := user_service.CreateUserWithAddress(&usr, addr); err != nil {
+		logging.ErrorF("failed to create user(%+v): %+v\n", usr, err)
 		c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg(err.Error()))
 		c.Abort()
 		return

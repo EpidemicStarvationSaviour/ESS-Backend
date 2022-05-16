@@ -36,7 +36,7 @@ type UserCreateReqAddress struct {
 }
 
 type UserCreateResp struct {
-	UserId int `json:"id" form:"id"`
+	UserId int `json:"id"`
 }
 
 type UserInfoResp struct {
@@ -59,8 +59,10 @@ type UserInfoRespAddress struct {
 }
 
 type UserModifyReq struct {
-	UserName  string `json:"userName" binding:"required"`
-	UserPhone string `json:"userPhone" binding:"required"`
+	UserName             string `json:"user_name"`
+	UserPhone            string `json:"user_phone"`
+	UserRole             Role   `json:"user_role"`
+	UserDefaultAddressId int    `json:"user_default_address_id"`
 }
 
 type UserDeleteReq struct {
@@ -79,11 +81,11 @@ type AuthReq struct {
 }
 
 type AuthResp struct {
-	UserPhone string `json:"user_phone" form:"user_phone"`
-	UserName  string `json:"user_name" form:"user_name"`
-	UserRole  Role   `json:"user_role" form:"user_role"`
-	UserToken string `json:"user_token" form:"user_token"`
-	LoginType string `json:"login_type" form:"login_type"`
+	UserPhone string `json:"user_phone"`
+	UserName  string `json:"user_name"`
+	UserRole  Role   `json:"user_role"`
+	UserToken string `json:"user_token"`
+	LoginType string `json:"login_type"`
 }
 
 type TokenAuth struct {

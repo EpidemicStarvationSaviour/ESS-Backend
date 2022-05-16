@@ -3,7 +3,6 @@ package user_service
 import (
 	"ess/model/address"
 	"ess/model/user"
-	"ess/service/address_service"
 	"ess/utils/cache"
 	"ess/utils/db"
 	"ess/utils/logging"
@@ -79,7 +78,11 @@ func CreateUser(user *user.User) error {
 }
 
 func UpdateUser(user *user.User) error {
-	return db.MysqlDB.Model(user).Updates(user).Error
+	err := db.MysqlDB.Model(user).Updates(user).Error
+	if err == nil {
+		cache.Set(cache.GetKey(cache.UserInfo, user.UserId), user)
+	}
+	return err
 }
 
 func CleanUserCache(user user.User) {
@@ -160,19 +163,19 @@ func CreateUserWithAddress(user *user.User, addr *address.Address) error {
 		return err
 	}
 
-	if err := address_service.CreateAddress(addr); err != nil {
+	if err := tx.Create(addr).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	user.UserDefaultAddressId = addr.AddressId
-	if err := CreateUser(user); err != nil {
+	if err := tx.Create(user).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	addr.AddressUserId = user.UserId
-	if err := address_service.UpdateAddress(addr); err != nil {
+	if err := tx.Model(addr).Updates(addr).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

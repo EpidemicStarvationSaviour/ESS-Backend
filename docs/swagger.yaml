@@ -1,4 +1,35 @@
 definitions:
+  address.AddressCreateReq:
+    properties:
+      area:
+        type: string
+      city:
+        type: string
+      detail:
+        type: string
+      is_default:
+        type: boolean
+      province:
+        type: string
+    required:
+    - area
+    - city
+    - detail
+    - is_default
+    - province
+    type: object
+  address.AddressCreateResp:
+    properties:
+      id:
+        type: integer
+    type: object
+  address.AddressDeleteReq:
+    properties:
+      address_id:
+        type: integer
+    required:
+    - address_id
+    type: object
   group.GroupInfoResp:
     properties:
       count:
@@ -38,6 +69,9 @@ definitions:
     properties:
       user_address:
         $ref: '#/definitions/user.UserCreateReqAddress'
+      user_name:
+        maxLength: 30
+        type: string
       user_phone:
         example: "13800138000"
         maxLength: 20
@@ -46,14 +80,11 @@ definitions:
         example: 1
         type: integer
       user_secret:
-        maxLength: 30
-        type: string
-      userSecret:
         maxLength: 20
         type: string
     required:
-    - userSecret
     - user_address
+    - user_name
     - user_phone
     - user_role
     - user_secret
@@ -81,24 +112,48 @@ definitions:
     type: object
   user.UserInfoResp:
     properties:
-      userId:
+      user_address:
+        items:
+          $ref: '#/definitions/user.UserInfoRespAddress'
+        type: array
+      user_id:
         type: integer
-      userName:
+      user_name:
         type: string
-      userPhone:
+      user_phone:
         type: string
-      userType:
+      user_role:
         type: integer
+    type: object
+  user.UserInfoRespAddress:
+    properties:
+      area:
+        type: string
+      city:
+        type: string
+      detail:
+        type: string
+      id:
+        type: integer
+      is_default:
+        type: boolean
+      lat:
+        type: number
+      lng:
+        type: number
+      province:
+        type: string
     type: object
   user.UserModifyReq:
     properties:
-      userName:
+      user_default_address_id:
+        type: integer
+      user_name:
         type: string
-      userPhone:
+      user_phone:
         type: string
-    required:
-    - userName
-    - userPhone
+      user_role:
+        type: integer
     type: object
 info:
   contact: {}
@@ -171,6 +226,43 @@ paths:
       summary: refresh token
       tags:
       - token
+  /user/address:
+    delete:
+      parameters:
+      - description: address information
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/address.AddressDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '''success'''
+          schema:
+            type: string
+      summary: delete address
+      tags:
+      - user
+    post:
+      parameters:
+      - description: new address information
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/address.AddressCreateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/address.AddressCreateResp'
+      summary: add address
+      tags:
+      - user
   /user/me:
     get:
       produces:

@@ -2,6 +2,7 @@ package address_service
 
 import (
 	"ess/model/address"
+	"ess/model/user"
 	"ess/utils/db"
 )
 
@@ -13,8 +14,61 @@ func UpdateAddress(addr *address.Address) error {
 	return db.MysqlDB.Model(addr).Updates(addr).Error
 }
 
+func DeleteAddress(addr *address.Address) error {
+	return db.MysqlDB.Delete(addr).Error
+}
+
 func QueryAddressesByUserId(uid int) ([]address.Address, error) {
 	var addresses []address.Address
 	err := db.MysqlDB.Where(&address.Address{AddressUserId: uid}).Find(&addresses).Error
 	return addresses, err
+}
+
+func CheckAddressByUserId(aid int, uid int) (bool, error) {
+	var count int64
+	err := db.MysqlDB.Model(&address.Address{}).Where(&address.Address{AddressId: aid, AddressUserId: uid}).Count(&count).Error
+	if err != nil {
+		return true, err
+	}
+	return (count == 1), nil
+}
+
+func ModifyDefaultAddressIfNeeded(aid int) error {
+	tx := db.MysqlDB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return err
+	}
+
+	var addr address.Address
+	if err := tx.Where(&address.Address{AddressId: aid}).First(&addr).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	var usr user.User
+	if err := tx.Where(&user.User{UserId: addr.AddressUserId}).First(&usr).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if usr.UserDefaultAddressId == aid {
+		var new_addr address.Address
+		if err := tx.Where(&address.Address{AddressUserId: usr.UserId}).Not(&address.Address{AddressId: aid}).First(&new_addr).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		usr.UserDefaultAddressId = new_addr.AddressId
+		if err := tx.Model(&usr).Updates(&usr).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit().Error
 }
