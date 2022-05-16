@@ -11,6 +11,7 @@ import (
 type Policy interface {
 	AdminOnly() bool
 	LoginOnly() bool
+	PurchaserOnly() bool
 	CheckExpired() bool
 	SysAdminOnly() bool
 	GetId() int
@@ -29,6 +30,10 @@ type Payload struct {
 
 func (p *Payload) LoginOnly() bool {
 	return p.Role != user.NoLogin
+}
+
+func (p *Payload) PurchaserOnly() bool {
+	return p.Role == user.Purchaser
 }
 
 func (p *Payload) AdminOnly() bool {

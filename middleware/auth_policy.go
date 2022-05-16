@@ -46,3 +46,16 @@ func LoginOnly() gin.HandlerFunc {
 		}
 	}
 }
+
+// check the policy and return ERROR_NOT_PURCHASER if forbidden
+// CAUTION: use it after jwt middleware
+func PurchaserOnly() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		claim, _ := c.Get(define.ESSPOLICY)
+		if policy, ok := claim.(authUtils.Policy); !ok || !policy.PurchaserOnly() {
+			c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("不是购买方"))
+			c.Abort()
+			return
+		}
+	}
+}

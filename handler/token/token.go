@@ -102,5 +102,5 @@ func Refresh(c *gin.Context) {
 		token, _ = authUtils.GetUserToken(policy.ConvertToUser())
 	}
 	c.SetCookie(define.ESSTOKEN, "Bearer "+token, int(setting.ServerSetting.JwtExpireTime.Seconds()), "/", "", false, true)
-	c.Set(define.ESSRESPONSE, response.JSONData(user_service.NewLoginResp(policy.ConvertToUser(), token, "email")))
+	c.Set(define.ESSRESPONSE, response.JSONData(user_service.NewLoginResp(policy.ConvertToUser(), token, "phone")))
 }

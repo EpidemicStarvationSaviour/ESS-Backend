@@ -15,3 +15,19 @@ type Address struct {
 	AddressUpdatedAt int64   `gorm:"autoUpdateTime"`
 	AddressDeleted   gorm.DeletedAt
 }
+
+type AddressCreateReq struct {
+	AddressProvince  string `json:"province" form:"province" binding:"required"`
+	AddressCity      string `json:"city" form:"city" binding:"required"`
+	AddressArea      string `json:"area" form:"area" binding:"required"`
+	AddressDetail    string `json:"detail" form:"detail" binding:"required"`
+	IsDefaultAddress bool   `json:"is_default" form:"is_default" binding:"required"`
+}
+
+type AddressCreateResp struct {
+	AddressId int `json:"id"`
+}
+
+type AddressDeleteReq struct {
+	AddressId int `json:"address_id" form:"address_id" binding:"required"`
+}

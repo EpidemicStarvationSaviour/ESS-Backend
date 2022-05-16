@@ -123,6 +123,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/address": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "add address",
+                "parameters": [
+                    {
+                        "description": "new address information",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/address.AddressCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/address.AddressCreateResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "delete address",
+                "parameters": [
+                    {
+                        "description": "address information",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/address.AddressDeleteReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "'success'",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/user/me": {
             "get": {
                 "produces": [
@@ -200,6 +258,25 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/workinfo": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "dashboard",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.UserDashboardResp"
+                        }
+                    }
+                }
+            }
+        },
         "/version": {
             "get": {
                 "produces": [
@@ -221,6 +298,52 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "address.AddressCreateReq": {
+            "type": "object",
+            "required": [
+                "area",
+                "city",
+                "detail",
+                "is_default",
+                "province"
+            ],
+            "properties": {
+                "area": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "is_default": {
+                    "type": "boolean"
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
+        "address.AddressCreateResp": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "address.AddressDeleteReq": {
+            "type": "object",
+            "required": [
+                "address_id"
+            ],
+            "properties": {
+                "address_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "group.GroupInfoResp": {
             "type": "object",
             "properties": {
@@ -276,19 +399,19 @@ const docTemplate = `{
         "user.UserCreateReq": {
             "type": "object",
             "required": [
-                "userSecret",
                 "user_address",
+                "user_name",
                 "user_phone",
                 "user_role",
                 "user_secret"
             ],
             "properties": {
-                "userSecret": {
-                    "type": "string",
-                    "maxLength": 20
-                },
                 "user_address": {
                     "$ref": "#/definitions/user.UserCreateReqAddress"
+                },
+                "user_name": {
+                    "type": "string",
+                    "maxLength": 30
                 },
                 "user_phone": {
                     "type": "string",
@@ -301,7 +424,7 @@ const docTemplate = `{
                 },
                 "user_secret": {
                     "type": "string",
-                    "maxLength": 30
+                    "maxLength": 20
                 }
             }
         },
@@ -336,35 +459,89 @@ const docTemplate = `{
                 }
             }
         },
+        "user.UserDashboardResp": {
+            "type": "object",
+            "properties": {
+                "finished_groups": {
+                    "type": "integer"
+                },
+                "total_commodities": {
+                    "type": "integer"
+                },
+                "total_groups": {
+                    "type": "integer"
+                },
+                "total_users": {
+                    "type": "integer"
+                }
+            }
+        },
         "user.UserInfoResp": {
             "type": "object",
             "properties": {
-                "userId": {
+                "user_address": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/user.UserInfoRespAddress"
+                    }
+                },
+                "user_id": {
                     "type": "integer"
                 },
-                "userName": {
+                "user_name": {
                     "type": "string"
                 },
-                "userPhone": {
+                "user_phone": {
                     "type": "string"
                 },
-                "userType": {
+                "user_role": {
                     "type": "integer"
+                }
+            }
+        },
+        "user.UserInfoRespAddress": {
+            "type": "object",
+            "properties": {
+                "area": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_default": {
+                    "type": "boolean"
+                },
+                "lat": {
+                    "type": "number"
+                },
+                "lng": {
+                    "type": "number"
+                },
+                "province": {
+                    "type": "string"
                 }
             }
         },
         "user.UserModifyReq": {
             "type": "object",
-            "required": [
-                "userName",
-                "userPhone"
-            ],
             "properties": {
-                "userName": {
+                "user_default_address_id": {
+                    "type": "integer"
+                },
+                "user_name": {
                     "type": "string"
                 },
-                "userPhone": {
+                "user_phone": {
                     "type": "string"
+                },
+                "user_role": {
+                    "type": "integer"
                 }
             }
         }

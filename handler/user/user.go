@@ -2,7 +2,13 @@ package user
 
 import (
 	"ess/define"
+	"ess/model/category"
+	"ess/model/group"
 	"ess/model/user"
+	"ess/service/address_service"
+	"ess/service/common_service"
+	"ess/service/group_service"
+	"ess/service/route_service"
 	"ess/service/user_service"
 	"ess/utils/authUtils"
 	"ess/utils/crypto"
@@ -25,10 +31,10 @@ func GetInfo(c *gin.Context) {
 
 	if policy.SysAdminOnly() {
 		sysAdminResp := user.UserInfoResp{
-			ID:    setting.AdminSetting.UserId,
-			Name:  setting.AdminSetting.Name,
-			Type:  user.SysAdmin,
-			Phone: setting.AdminSetting.Phone,
+			UserId:    setting.AdminSetting.UserId,
+			UserName:  setting.AdminSetting.Name,
+			UserRole:  user.SysAdmin,
+			UserPhone: setting.AdminSetting.Phone,
 		}
 		c.Set(define.ESSRESPONSE, response.JSONData(sysAdminResp))
 		return
@@ -42,13 +48,24 @@ func GetInfo(c *gin.Context) {
 		return
 	}
 
-	userResp := user.UserInfoResp{
-		ID:    userRec.UserId,
-		Name:  userRec.UserName,
-		Type:  userRec.UserRole,
-		Phone: userRec.UserPhone,
+	addr, err := address_service.QueryAddressesByUserId(userID)
+	if err != nil {
+		logging.ErrorF("failed to retrieve addresses (uid: %v): %+v\n", userID, err)
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+		c.Abort()
+		return
 	}
-	c.Set(define.ESSRESPONSE, response.JSONData(userResp))
+
+	resp := user.UserInfoResp{}
+	copier.Copy(&resp, &userRec)
+	for _, v := range addr {
+		var address user.UserInfoRespAddress
+		copier.Copy(&address, &v)
+		address.IsDefaultAddress = (v.AddressId == userRec.UserDefaultAddressId)
+		resp.UserAddress = append(resp.UserAddress, address)
+	}
+
+	c.Set(define.ESSRESPONSE, response.JSONData(resp))
 }
 
 // @Summary modify user info
@@ -85,12 +102,32 @@ func ModifyInfo(c *gin.Context) {
 		return
 	}
 
-	userRec.UserName = req.UserName
-	userRec.UserPhone = req.UserPhone
+	if req.UserRole == user.SysAdmin || req.UserRole == user.Admin {
+		c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("不允许提权"))
+		c.Abort()
+		return
+	}
+
+	if req.UserDefaultAddressId != 0 {
+		valid, err := address_service.CheckAddressByUserId(req.UserDefaultAddressId, userID)
+		if err != nil {
+			logging.ErrorF("failed to check address owner(aid: %+v, uid: %+v): %+v\n", req.UserDefaultAddressId, userID, err)
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+			c.Abort()
+			return
+		}
+		if !valid {
+			c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("默认地址不存在"))
+			c.Abort()
+			return
+		}
+	}
+
+	copier.Copy(&userRec, &req)
 
 	err := user_service.UpdateUser(&userRec)
-
 	if err != nil {
+		logging.ErrorF("failed to retrieve addresses (uid: %v): %+v\n", userID, err)
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_UPDATE_FAIL))
 		c.Abort()
 		return
@@ -128,6 +165,7 @@ func CreateUser(c *gin.Context) {
 	copier.Copy(&usr, &req)
 
 	if err := user_service.CreateUserWithAddress(&usr, addr); err != nil {
+		logging.ErrorF("failed to create user(%+v): %+v\n", usr, err)
 		c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg(err.Error()))
 		c.Abort()
 		return
@@ -145,4 +183,83 @@ func CreateUser(c *gin.Context) {
 
 	resp := user.UserCreateResp{UserId: usr.UserId}
 	c.Set(define.ESSRESPONSE, response.JSONData(resp))
+}
+
+// @Summary dashboard
+// @Tags    user
+// @Produce json
+// @Success 200 {object} user.UserDashboardResp
+// @Router  /user/workinfo [get]
+func GetDashboard(c *gin.Context) {
+	claim, _ := c.Get(define.ESSPOLICY)
+	policy, _ := claim.(authUtils.Policy)
+
+	userID := policy.GetId()
+
+	TotalUsers, err := common_service.DatabaseCount(&user.User{})
+	if err != nil {
+		logging.ErrorF("failed to count users: %+v\n", err)
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+		c.Abort()
+		return
+	}
+
+	TotalGroups, err := common_service.DatabaseCount(&group.Group{})
+	if err != nil {
+		logging.ErrorF("failed to count groups: %+v\n", err)
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+		c.Abort()
+		return
+	}
+
+	TotalCommodities, err := common_service.DatabaseCount(&category.Category{})
+	if err != nil {
+		logging.ErrorF("failed to count categories: %+v\n", err)
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+		c.Abort()
+		return
+	}
+
+	usr := user_service.QueryUserById(userID)
+	if usr.UserId <= 0 {
+		logging.ErrorF("failed to query user(%+v): %+v\n", userID, err)
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+		c.Abort()
+		return
+	}
+
+	var FinishedGroups int64
+	switch usr.UserRole {
+	case user.Rider:
+		FinishedGroups, err = group_service.RiderFinishedCount(userID)
+		if err != nil {
+			logging.ErrorF("failed to count finished groups: %+v\n", err)
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+			c.Abort()
+			return
+		}
+	case user.Supplier:
+		FinishedGroups, err = route_service.SupplierFinishedCount(userID)
+		if err != nil {
+			logging.ErrorF("failed to count finished groups: %+v\n", err)
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+			c.Abort()
+			return
+		}
+	default:
+		FinishedGroups, err = group_service.PurchaserAndLeaderFinishedCount(userID)
+		if err != nil {
+			logging.ErrorF("failed to count finished groups: %+v\n", err)
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+			c.Abort()
+			return
+		}
+	}
+
+	c.Set(define.ESSRESPONSE, response.JSONData(user.UserDashboardResp{
+		TotalUsers:       TotalUsers,
+		TotalGroups:      TotalGroups,
+		TotalCommodities: TotalCommodities,
+		FinishedGroups:   FinishedGroups,
+	}))
 }

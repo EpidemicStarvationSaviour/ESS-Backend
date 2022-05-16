@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"ess/handler/address"
 	api_info "ess/handler/api"
 	"ess/handler/group"
 	"ess/handler/token"
@@ -39,6 +40,9 @@ func InitRouter() *gin.Engine {
 	userMod.GET("/me", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), user.GetInfo)
 	userMod.POST("/register", user.CreateUser)
 	userMod.PUT("/me", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), user.ModifyInfo)
+	userMod.POST("/address", middleware.AuthenticationMiddleware(), middleware.PurchaserOnly(), address.CreateAddr)
+	userMod.DELETE("/address", middleware.AuthenticationMiddleware(), middleware.PurchaserOnly(), address.DeleteAddr)
+	userMod.GET("/workinfo", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), user.GetDashboard)
 
 	tokenMod := api.Group("/token")
 	tokenMod.POST("/login", token.Login)
