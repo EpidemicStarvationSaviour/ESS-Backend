@@ -1,12 +1,24 @@
 package user
 
+import (
+	"ess/model/address"
+
+	"gorm.io/gorm"
+)
+
 type User struct {
-	UserId     int    `gorm:"primaryKey"`
-	UserName   string `gorm:"uniqueIndex;size:30"`
-	UserEmail  string `gorm:"uniqueIndex;size:30"`
-	UserType   Role
-	UserPhone  string `gorm:"size:20"`
-	UserSecret string
+	UserId               int             `gorm:"primaryKey"`
+	UserName             string          `gorm:"uniqueIndex;size:30"`
+	UserEmail            string          `gorm:"uniqueIndex;size:30"` // TODO(TO/GA): delete it
+	UserType             Role            `gorm:"not null"`
+	UserPhone            string          `gorm:"size:20;not null"`
+	UserSecret           string          `gorm:"size:63;not null"`
+	UserDefaultAddress   address.Address `gorm:"foreignKey:UserDefaultAddressId"`
+	UserDefaultAddressId int             `gorm:"not null"`
+	UserAvailable        bool            `gorm:"default:true;not null"`
+	UserCreatedAt        int64           `gorm:"autoCreateTime"`
+	UserUpdatedAt        int64           `gorm:"autoUpdateTime"`
+	UserDeleted          gorm.DeletedAt
 }
 
 type UserInfoResp struct {
