@@ -14,7 +14,7 @@ type Route struct {
 	RouteUser          user.User   `gorm:"foreignKey:RouteUserId"`
 	RouteUserId        int         `gorm:"not null"`
 	RouteItems         string      `gorm:"size:255"`
-	RouteEstimatedTime int64       `gorm:"not null;check:route_estimated_time>=0"`
+	RouteEstimatedTime int64       `gorm:"not null;check:route_estimated_time>=0"` // seconds
 	RouteDone          bool        `gorm:"not null;default:0"`
 	RouteFinishedAt    time.Time   `gorm:""`
 	RouteCreatedAt     int64       `gorm:"autoCreateTime"`

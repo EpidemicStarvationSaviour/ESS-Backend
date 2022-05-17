@@ -3,6 +3,7 @@ package main
 import (
 	"ess/handler"
 	"ess/utils/algorithm"
+	"ess/utils/amap"
 	"ess/utils/cache"
 	"ess/utils/db"
 	"ess/utils/logging"
@@ -21,6 +22,7 @@ func main() {
 	logging.Setup()
 	db.Setup()
 	algorithm.Setup()
+	amap.Setup()
 
 	router := handler.InitRouter()
 	logging.Info("[server] running on ", setting.ServerSetting.HttpPort)
