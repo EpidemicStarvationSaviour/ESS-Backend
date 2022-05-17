@@ -309,19 +309,24 @@ const docTemplate = `{
             ],
             "properties": {
                 "area": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "西湖区"
                 },
                 "city": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "杭州市"
                 },
                 "detail": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "浙江大学紫金港校区"
                 },
                 "is_default": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 },
                 "province": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "浙江省"
                 }
             }
         },
@@ -344,11 +349,119 @@ const docTemplate = `{
                 }
             }
         },
+        "group.GroupInfoAddress": {
+            "type": "object",
+            "properties": {
+                "area": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lat": {
+                    "type": "number"
+                },
+                "lng": {
+                    "type": "number"
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.GroupInfoCommodity": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "number"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "total_number": {
+                    "type": "number"
+                },
+                "type_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "group.GroupInfoData": {
+            "type": "object",
+            "properties": {
+                "commodity_detail": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/group.GroupInfoCommodity"
+                    }
+                },
+                "created_time": {
+                    "type": "integer"
+                },
+                "creator_address": {
+                    "$ref": "#/definitions/group.GroupInfoAddress"
+                },
+                "creator_id": {
+                    "type": "integer"
+                },
+                "creator_name": {
+                    "type": "string"
+                },
+                "creator_phone": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "total_my_price": {
+                    "type": "number"
+                },
+                "total_price": {
+                    "type": "number"
+                },
+                "type": {
+                    "type": "integer"
+                },
+                "user_number": {
+                    "type": "integer"
+                }
+            }
+        },
         "group.GroupInfoResp": {
             "type": "object",
             "properties": {
                 "count": {
                     "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/group.GroupInfoData"
+                    }
                 }
             }
         },
@@ -420,7 +533,7 @@ const docTemplate = `{
                 },
                 "user_role": {
                     "type": "integer",
-                    "example": 1
+                    "example": 3
                 },
                 "user_secret": {
                     "type": "string",
@@ -438,16 +551,20 @@ const docTemplate = `{
             ],
             "properties": {
                 "area": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "西湖区"
                 },
                 "city": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "杭州市"
                 },
                 "detail": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "浙江大学玉泉校区"
                 },
                 "province": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "浙江省"
                 }
             }
         },

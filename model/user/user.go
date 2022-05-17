@@ -23,16 +23,16 @@ type User struct {
 type UserCreateReq struct {
 	UserPhone   string               `json:"user_phone" form:"user_phone" binding:"required,max=20" example:"13800138000"`
 	UserSecret  string               `json:"user_secret" form:"user_secret" binding:"required,max=20"`
-	UserRole    Role                 `json:"user_role" form:"user_role" binding:"required" example:"1"`
+	UserRole    Role                 `json:"user_role" form:"user_role" binding:"required" example:"3"`
 	UserName    string               `json:"user_name" form:"user_name" binding:"required,max=30"`
 	UserAddress UserCreateReqAddress `json:"user_address" form:"user_address" binding:"required"`
 }
 
 type UserCreateReqAddress struct {
-	AddressProvince string `json:"province" form:"province" binding:"required"`
-	AddressCity     string `json:"city" form:"city" binding:"required"`
-	AddressArea     string `json:"area" form:"area" binding:"required"`
-	AddressDetail   string `json:"detail" form:"detail" binding:"required"`
+	AddressProvince string `json:"province" form:"province" binding:"required" example:"浙江省"`
+	AddressCity     string `json:"city" form:"city" binding:"required" example:"杭州市"`
+	AddressArea     string `json:"area" form:"area" binding:"required" example:"西湖区"`
+	AddressDetail   string `json:"detail" form:"detail" binding:"required" example:"浙江大学玉泉校区"`
 }
 
 type UserCreateResp struct {

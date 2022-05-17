@@ -2,14 +2,19 @@ definitions:
   address.AddressCreateReq:
     properties:
       area:
+        example: 西湖区
         type: string
       city:
+        example: 杭州市
         type: string
       detail:
+        example: 浙江大学紫金港校区
         type: string
       is_default:
+        example: true
         type: boolean
       province:
+        example: 浙江省
         type: string
     required:
     - area
@@ -30,10 +35,81 @@ definitions:
     required:
     - address_id
     type: object
+  group.GroupInfoAddress:
+    properties:
+      area:
+        type: string
+      city:
+        type: string
+      detail:
+        type: string
+      id:
+        type: integer
+      lat:
+        type: number
+      lng:
+        type: number
+      province:
+        type: string
+    type: object
+  group.GroupInfoCommodity:
+    properties:
+      avatar:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      number:
+        type: number
+      price:
+        type: number
+      total_number:
+        type: number
+      type_id:
+        type: integer
+    type: object
+  group.GroupInfoData:
+    properties:
+      commodity_detail:
+        items:
+          $ref: '#/definitions/group.GroupInfoCommodity'
+        type: array
+      created_time:
+        type: integer
+      creator_address:
+        $ref: '#/definitions/group.GroupInfoAddress'
+      creator_id:
+        type: integer
+      creator_name:
+        type: string
+      creator_phone:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      remark:
+        type: string
+      total_my_price:
+        type: number
+      total_price:
+        type: number
+      type:
+        type: integer
+      user_number:
+        type: integer
+    type: object
   group.GroupInfoResp:
     properties:
       count:
         type: integer
+      data:
+        items:
+          $ref: '#/definitions/group.GroupInfoData'
+        type: array
     type: object
   user.AuthReq:
     properties:
@@ -77,7 +153,7 @@ definitions:
         maxLength: 20
         type: string
       user_role:
-        example: 1
+        example: 3
         type: integer
       user_secret:
         maxLength: 20
@@ -92,12 +168,16 @@ definitions:
   user.UserCreateReqAddress:
     properties:
       area:
+        example: 西湖区
         type: string
       city:
+        example: 杭州市
         type: string
       detail:
+        example: 浙江大学玉泉校区
         type: string
       province:
+        example: 浙江省
         type: string
     required:
     - area
