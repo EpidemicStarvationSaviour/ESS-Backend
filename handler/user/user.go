@@ -102,8 +102,8 @@ func ModifyInfo(c *gin.Context) {
 		return
 	}
 
-	if req.UserRole == user.SysAdmin || req.UserRole == user.Admin {
-		c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("不允许提权"))
+	if req.UserRole != user.Leader || userRec.UserRole != user.Purchaser {
+		c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("权限变更只允许从购买者变为团长"))
 		c.Abort()
 		return
 	}
