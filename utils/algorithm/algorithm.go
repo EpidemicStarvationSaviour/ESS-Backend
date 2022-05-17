@@ -38,7 +38,7 @@ func Schedule(gid int64) error {
 					Items: map[uint32]float64{1: 5, 2: 1.5},
 				},
 			},
-			Distance: []float64{1, 2, 3},
+			Distance: []uint64{1, 2, 3},
 		}
 		r, err := s.Schedule(&request)
 		if err != nil {
