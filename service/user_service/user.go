@@ -142,7 +142,7 @@ func ValidUser(user user.UserCreateReq) (*address.Address, bool) {
 	}
 
 	var addr address.Address
-	copier.Copy(&addr, &user.UserAddress)
+	_ = copier.Copy(&addr, &user.UserAddress)
 	addr.AddressUserId = 0 // placeholder
 	// TODO(TO/GA): amap
 	addr.AddressLat = 0

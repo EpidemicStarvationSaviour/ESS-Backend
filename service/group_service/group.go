@@ -109,7 +109,7 @@ func QueryGroupCategories(gid int) *[]group.GroupInfoCommodity {
 	}
 
 	for _, catinfo := range groupcat {
-		copier.Copy(tmp, catinfo)
+		_ = copier.Copy(tmp, catinfo)
 		rescat = append(rescat, tmp)
 	}
 	return &rescat

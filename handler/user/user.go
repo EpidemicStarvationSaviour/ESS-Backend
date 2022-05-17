@@ -57,10 +57,10 @@ func GetInfo(c *gin.Context) {
 	}
 
 	resp := user.UserInfoResp{}
-	copier.Copy(&resp, &userRec)
+	_ = copier.Copy(&resp, &userRec)
 	for _, v := range addr {
 		var address user.UserInfoRespAddress
-		copier.Copy(&address, &v)
+		_ = copier.Copy(&address, &v)
 		address.IsDefaultAddress = (v.AddressId == userRec.UserDefaultAddressId)
 		resp.UserAddress = append(resp.UserAddress, address)
 	}
@@ -123,7 +123,7 @@ func ModifyInfo(c *gin.Context) {
 		}
 	}
 
-	copier.Copy(&userRec, &req)
+	_ = copier.Copy(&userRec, &req)
 
 	err := user_service.UpdateUser(&userRec)
 	if err != nil {
@@ -162,7 +162,7 @@ func CreateUser(c *gin.Context) {
 	req.UserSecret = crypto.Password2Secret(req.UserSecret)
 
 	var usr user.User
-	copier.Copy(&usr, &req)
+	_ = copier.Copy(&usr, &req)
 
 	if err := user_service.CreateUserWithAddress(&usr, addr); err != nil {
 		logging.ErrorF("failed to create user(%+v): %+v\n", usr, err)

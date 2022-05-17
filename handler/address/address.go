@@ -32,7 +32,7 @@ func CreateAddr(c *gin.Context) {
 	}
 
 	var addr address.Address
-	copier.Copy(&addr, &req)
+	_ = copier.Copy(&addr, &req)
 	addr.AddressUserId = policy.GetId()
 
 	// TODO(TO/GA): amap
