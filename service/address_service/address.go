@@ -10,6 +10,12 @@ func CreateAddress(addr *address.Address) error {
 	return db.MysqlDB.Create(addr).Error
 }
 
+func QueryAddressById(aid int) (*address.Address, error) {
+	var addr address.Address
+	err := db.MysqlDB.Model(&addr).Where(&address.Address{AddressId: aid}).First(&addr).Error
+	return &addr, err
+}
+
 func UpdateAddress(addr *address.Address) error {
 	return db.MysqlDB.Model(addr).Updates(addr).Error
 }

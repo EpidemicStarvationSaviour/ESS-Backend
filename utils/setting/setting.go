@@ -67,6 +67,21 @@ type Secret struct {
 
 var SecretSetting = &Secret{}
 
+type GRPC struct {
+	Enable  bool
+	Host    string
+	Timeout uint
+}
+
+var GRPCSetting = &GRPC{}
+
+type Amap struct {
+	Enable    bool
+	WebAPIKey string
+}
+
+var AmapSetting = &Amap{}
+
 // init the setting struct
 func Setup() {
 	Cfg, err := ini.Load("conf/app.ini")
@@ -105,8 +120,21 @@ func Setup() {
 		log.Fatalf("Fail to parse 'AdminSetting': %v", err)
 	}
 
+	//---------------- secret config ----------------------
 	err = Cfg.Section("secret").MapTo(SecretSetting)
 	if err != nil {
 		log.Fatalf("Fail to parse 'SecretSetting': %v", err)
+	}
+
+	//---------------- gRPC config ----------------------
+	err = Cfg.Section("grpc").MapTo(GRPCSetting)
+	if err != nil {
+		log.Fatalf("Fail to parse 'gRPCSetting': %v", err)
+	}
+
+	//---------------- amap config ----------------------
+	err = Cfg.Section("amap").MapTo(AmapSetting)
+	if err != nil {
+		log.Fatalf("Fail to parse 'AmapSetting': %v", err)
 	}
 }

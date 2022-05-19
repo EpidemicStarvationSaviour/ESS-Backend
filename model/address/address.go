@@ -17,11 +17,11 @@ type Address struct {
 }
 
 type AddressCreateReq struct {
-	AddressProvince  string `json:"province" form:"province" binding:"required"`
-	AddressCity      string `json:"city" form:"city" binding:"required"`
-	AddressArea      string `json:"area" form:"area" binding:"required"`
-	AddressDetail    string `json:"detail" form:"detail" binding:"required"`
-	IsDefaultAddress bool   `json:"is_default" form:"is_default" binding:"required"`
+	AddressProvince  string `json:"province" form:"province" binding:"required" example:"浙江省"`
+	AddressCity      string `json:"city" form:"city" binding:"required" example:"杭州市"`
+	AddressArea      string `json:"area" form:"area" binding:"required" example:"西湖区"`
+	AddressDetail    string `json:"detail" form:"detail" binding:"required" example:"浙江大学紫金港校区"`
+	IsDefaultAddress bool   `json:"is_default" form:"is_default" binding:"required" example:"true"`
 }
 
 type AddressCreateResp struct {

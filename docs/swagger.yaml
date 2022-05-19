@@ -2,14 +2,19 @@ definitions:
   address.AddressCreateReq:
     properties:
       area:
+        example: 西湖区
         type: string
       city:
+        example: 杭州市
         type: string
       detail:
+        example: 浙江大学紫金港校区
         type: string
       is_default:
+        example: true
         type: boolean
       province:
+        example: 浙江省
         type: string
     required:
     - area
@@ -179,7 +184,7 @@ definitions:
         maxLength: 20
         type: string
       user_role:
-        example: 1
+        example: 3
         type: integer
       user_secret:
         maxLength: 20
@@ -194,12 +199,16 @@ definitions:
   user.UserCreateReqAddress:
     properties:
       area:
+        example: 西湖区
         type: string
       city:
+        example: 杭州市
         type: string
       detail:
+        example: 浙江大学玉泉校区
         type: string
       province:
+        example: 浙江省
         type: string
     required:
     - area

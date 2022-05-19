@@ -6,6 +6,7 @@ import (
 	"ess/model/user"
 	"ess/service/address_service"
 	"ess/service/user_service"
+	"ess/utils/amap"
 	"ess/utils/authUtils"
 	"ess/utils/logging"
 	"ess/utils/response"
@@ -32,12 +33,15 @@ func CreateAddr(c *gin.Context) {
 	}
 
 	var addr address.Address
-	copier.Copy(&addr, &req)
+	_ = copier.Copy(&addr, &req)
 	addr.AddressUserId = policy.GetId()
 
-	// TODO(TO/GA): amap
-	addr.AddressLat = 0
-	addr.AddressLng = 0
+	if err := amap.GetCoordination(&addr); err != nil {
+		logging.ErrorF("failed to get coordination (addr: %+v): %+v\n", addr, err)
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
 
 	if err := address_service.CreateAddress(&addr); err != nil {
 		logging.ErrorF("failed to add addresses (addr: %+v): %+v\n", addr, err)

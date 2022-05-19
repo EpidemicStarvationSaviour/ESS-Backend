@@ -61,9 +61,9 @@ func GetMyGroup(c *gin.Context) {
 				return
 			}
 			result.Count++
-			copier.Copy(data, *retgroup)
-			copier.Copy(data, *creatorinfo)
-			copier.Copy(data.CreatorAddr, *groupaddr)
+			_ = copier.Copy(data, *retgroup)
+			_ = copier.Copy(data, *creatorinfo)
+			_ = copier.Copy(data.CreatorAddr, *groupaddr)
 			data.UserNumber = group_service.CountGroupUserById(retgroup.GroupId)
 			data.TotalPrice = group_service.QueryGroupTotalPriceById(retgroup.GroupId)
 			data.TotalMyPrice = group_service.QueryGroupUserPriceById(retgroup.GroupId, userinfo.UserId)

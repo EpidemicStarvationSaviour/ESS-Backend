@@ -7,6 +7,6 @@ import (
 
 func SupplierFinishedCount(uid int) (int64, error) {
 	var count int64
-	err := db.MysqlDB.Where(&route.Route{RouteUserId: uid, RouteDone: true}).Count(&count).Error
+	err := db.MysqlDB.Model(&route.Route{}).Where(&route.Route{RouteUserId: uid, RouteDone: true}).Count(&count).Error
 	return count, err
 }

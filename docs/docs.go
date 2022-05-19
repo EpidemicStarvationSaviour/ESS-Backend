@@ -350,19 +350,24 @@ const docTemplate = `{
             ],
             "properties": {
                 "area": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "西湖区"
                 },
                 "city": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "杭州市"
                 },
                 "detail": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "浙江大学紫金港校区"
                 },
                 "is_default": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 },
                 "province": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "浙江省"
                 }
             }
         },
@@ -617,7 +622,7 @@ const docTemplate = `{
                 },
                 "user_role": {
                     "type": "integer",
-                    "example": 1
+                    "example": 3
                 },
                 "user_secret": {
                     "type": "string",
@@ -635,16 +640,20 @@ const docTemplate = `{
             ],
             "properties": {
                 "area": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "西湖区"
                 },
                 "city": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "杭州市"
                 },
                 "detail": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "浙江大学玉泉校区"
                 },
                 "province": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "浙江省"
                 }
             }
         },
