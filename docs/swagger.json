@@ -4,6 +4,36 @@
         "contact": {}
     },
     "paths": {
+        "/group/create": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "create a new group",
+                "parameters": [
+                    {
+                        "description": "New Group Info",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.GroupCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/group.GroupCreateResp"
+                        }
+                    }
+                }
+            }
+        },
         "/group/list": {
             "get": {
                 "produces": [
@@ -12,7 +42,18 @@
                 "tags": [
                     "group"
                 ],
-                "summary": "get groups I joined",
+                "summary": "get groups I joined conditional",
+                "parameters": [
+                    {
+                        "description": "Group Condition",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.GroupInfoReq"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -332,11 +373,167 @@
                 }
             }
         },
+        "group.GroupCreateReq": {
+            "type": "object",
+            "properties": {
+                "address_id": {
+                    "type": "integer"
+                },
+                "commodities": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "user_group_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "group.GroupCreateResp": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "group.GroupInfoAddress": {
+            "type": "object",
+            "properties": {
+                "area": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lat": {
+                    "type": "number"
+                },
+                "lng": {
+                    "type": "number"
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.GroupInfoCommodity": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "number"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "total_number": {
+                    "type": "number"
+                },
+                "type_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "group.GroupInfoData": {
+            "type": "object",
+            "properties": {
+                "commodity_detail": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/group.GroupInfoCommodity"
+                    }
+                },
+                "created_time": {
+                    "type": "integer"
+                },
+                "creator_address": {
+                    "$ref": "#/definitions/group.GroupInfoAddress"
+                },
+                "creator_id": {
+                    "type": "integer"
+                },
+                "creator_name": {
+                    "type": "string"
+                },
+                "creator_phone": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "total_my_price": {
+                    "type": "number"
+                },
+                "total_price": {
+                    "type": "number"
+                },
+                "type": {
+                    "type": "integer"
+                },
+                "user_number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "group.GroupInfoReq": {
+            "type": "object",
+            "properties": {
+                "page_num": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
         "group.GroupInfoResp": {
             "type": "object",
             "properties": {
                 "count": {
                     "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/group.GroupInfoData"
+                    }
                 }
             }
         },

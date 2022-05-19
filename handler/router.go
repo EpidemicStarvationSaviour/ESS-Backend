@@ -51,5 +51,6 @@ func InitRouter() *gin.Engine {
 
 	groupMod := api.Group("/group")
 	groupMod.GET("/list", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.GetMyGroup)
+	groupMod.POST("/create", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.LaunchNewGroup)
 	return r
 }

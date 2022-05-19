@@ -24,4 +24,6 @@ const (
 
 	ERROR_DEFAULT  Code = 30000 // 未知错误
 	ERROR_IP_BLOCK Code = 40000 // ip 被暂时封禁
+
+	ERROR_GROUP_CREATE_FAIL Code = 50001 //团创建失败
 )

@@ -30,10 +30,112 @@ definitions:
     required:
     - address_id
     type: object
+  group.GroupCreateReq:
+    properties:
+      address_id:
+        type: integer
+      commodities:
+        items:
+          type: integer
+        type: array
+      description:
+        type: string
+      name:
+        type: string
+      remark:
+        type: string
+      user_group_id:
+        type: integer
+    type: object
+  group.GroupCreateResp:
+    properties:
+      id:
+        type: integer
+    type: object
+  group.GroupInfoAddress:
+    properties:
+      area:
+        type: string
+      city:
+        type: string
+      detail:
+        type: string
+      id:
+        type: integer
+      lat:
+        type: number
+      lng:
+        type: number
+      province:
+        type: string
+    type: object
+  group.GroupInfoCommodity:
+    properties:
+      avatar:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      number:
+        type: number
+      price:
+        type: number
+      total_number:
+        type: number
+      type_id:
+        type: integer
+    type: object
+  group.GroupInfoData:
+    properties:
+      commodity_detail:
+        items:
+          $ref: '#/definitions/group.GroupInfoCommodity'
+        type: array
+      created_time:
+        type: integer
+      creator_address:
+        $ref: '#/definitions/group.GroupInfoAddress'
+      creator_id:
+        type: integer
+      creator_name:
+        type: string
+      creator_phone:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      remark:
+        type: string
+      total_my_price:
+        type: number
+      total_price:
+        type: number
+      type:
+        type: integer
+      user_number:
+        type: integer
+    type: object
+  group.GroupInfoReq:
+    properties:
+      page_num:
+        type: integer
+      page_size:
+        type: integer
+      type:
+        type: integer
+    type: object
   group.GroupInfoResp:
     properties:
       count:
         type: integer
+      data:
+        items:
+          $ref: '#/definitions/group.GroupInfoData'
+        type: array
     type: object
   user.AuthReq:
     properties:
@@ -169,8 +271,34 @@ definitions:
 info:
   contact: {}
 paths:
+  /group/create:
+    post:
+      parameters:
+      - description: New Group Info
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/group.GroupCreateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.GroupCreateResp'
+      summary: create a new group
+      tags:
+      - group
   /group/list:
     get:
+      parameters:
+      - description: Group Condition
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/group.GroupInfoReq'
       produces:
       - application/json
       responses:
@@ -178,7 +306,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/group.GroupInfoResp'
-      summary: get groups I joined
+      summary: get groups I joined conditional
       tags:
       - group
   /ping:

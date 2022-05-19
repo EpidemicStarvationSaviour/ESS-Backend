@@ -1,0 +1,2 @@
+[INFO][db.go:52]2022/05/09 17:34:48 [server] database root@tcp(127.0.0.1:3306)/esstest connected
+[INFO][main.go:22]2022/05/09 17:34:48 [server] running on  8080

@@ -71,3 +71,16 @@ type GroupInfoResp struct {
 	Count int             `json:"count"`
 	Data  []GroupInfoData `json:"data"`
 }
+
+type GroupCreateReq struct {
+	GroupName        string `json:"name"`
+	GroupDescription string `json:"description"`
+	GroupRemark      string `json:"remark"`
+	GroupAddressId   int    `json:"address_id"`
+	GroupUserGroupId int    `json:"user_group_id"`
+	GroupCommodities []int  `json:"commodities"`
+}
+
+type GroupCreateResp struct {
+	GroupId int `json:"id"`
+}
