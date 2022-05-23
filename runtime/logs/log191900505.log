@@ -1,9 +1,0 @@
-[INFO][db.go:76]2022/05/19 10:49:29 [server] database root@tcp(127.0.0.1:3306)/esstest connected
-[INFO][main.go:24]2022/05/19 10:49:29 [server] running on  8080
-[INFO][db.go:76]2022/05/19 10:53:54 [server] database root@tcp(127.0.0.1:3306)/esstest connected
-[INFO][main.go:24]2022/05/19 10:53:54 [server] running on  8080
-[INFO][db.go:76]2022/05/19 10:55:49 [server] database root@tcp(127.0.0.1:3306)/esstest connected
-[INFO][main.go:24]2022/05/19 10:55:49 [server] running on  8080
-[INFO][db.go:76]2022/05/19 10:58:24 [server] database root@tcp(127.0.0.1:3306)/esstest connected
-[INFO][main.go:24]2022/05/19 10:58:24 [server] running on  8080
-[INFO][user.go:174]2022/05/19 11:02:37 create a new user: {UserId:1 UserName:string UserRole:1 UserPhone:13800138000 UserSecret:AFBDD75414608D120822F253335856B9A7A3D271 UserDefaultAddress:{AddressId:0 AddressProvince: AddressCity: AddressArea: AddressDetail: AddressLat:0 AddressLng:0 AddressUserId:0 AddressCreatedAt:0 AddressUpdatedAt:0 AddressDeleted:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} UserDefaultAddressId:1 UserAvailable:true UserCreatedAt:1652929357 UserUpdatedAt:1652929357 UserDeleted:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} with address:{AddressId:1 AddressProvince:string AddressCity:hz AddressArea:xihu AddressDetail:string AddressLat:0 AddressLng:0 AddressUserId:1 AddressCreatedAt:1652929357 AddressUpdatedAt:1652929357 AddressDeleted:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}}
