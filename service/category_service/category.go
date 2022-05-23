@@ -8,7 +8,7 @@ import (
 
 func QueryCategoryById(cid int) *category.Category {
 	var cat *category.Category
-	resinfo := db.MysqlDB.Where("cid = ?", cid).First(&cat)
+	resinfo := db.MysqlDB.Where(&category.Category{CategoryId: cid}).First(&cat)
 	logging.InfoF("Find %d category with cid %d\n", resinfo.RowsAffected, cid)
 	return cat
 }

@@ -46,6 +46,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/group/join": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "Join a group (create new order)",
+                "parameters": [
+                    {
+                        "description": "Join Group Info",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.GroupJoinReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/group.GroupInfoResp"
+                        }
+                    }
+                }
+            }
+        },
         "/group/list": {
             "get": {
                 "produces": [
@@ -64,6 +94,52 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/group.GroupInfoReq"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/group.GroupInfoResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/search": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "search exist groups",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "group_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page_num",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "search_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "value",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -551,6 +627,31 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/group.GroupInfoData"
                     }
+                }
+            }
+        },
+        "group.GroupJoinData": {
+            "type": "object",
+            "properties": {
+                "commodity_id": {
+                    "type": "integer"
+                },
+                "number": {
+                    "type": "number"
+                }
+            }
+        },
+        "group.GroupJoinReq": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/group.GroupJoinData"
+                    }
+                },
+                "id": {
+                    "type": "integer"
                 }
             }
         },

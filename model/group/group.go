@@ -84,3 +84,21 @@ type GroupCreateReq struct {
 type GroupCreateResp struct {
 	GroupId int `json:"id"`
 }
+
+type GroupSearchReq struct {
+	PageSIze    int    `form:"page_size" json:"page_size"`
+	PageNum     int    `form:"page_num" json:"page_num"`
+	SearchType  int    `form:"search_type" json:"search_type"`
+	GroupType   int    `form:"group_type" json:"group_type"`
+	SearchValue string `form:"value" json:"value"`
+}
+
+type GroupJoinData struct {
+	OrderCategoryId int     `json:"commodity_id"`
+	OrderAmount     float64 `json:"number"`
+}
+
+type GroupJoinReq struct {
+	GroupId   int             `json:"id"`
+	OrderData []GroupJoinData `json:"data"`
+}

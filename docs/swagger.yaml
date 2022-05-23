@@ -142,6 +142,22 @@ definitions:
           $ref: '#/definitions/group.GroupInfoData'
         type: array
     type: object
+  group.GroupJoinData:
+    properties:
+      commodity_id:
+        type: integer
+      number:
+        type: number
+    type: object
+  group.GroupJoinReq:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/group.GroupJoinData'
+        type: array
+      id:
+        type: integer
+    type: object
   user.AuthReq:
     properties:
       account:
@@ -299,6 +315,25 @@ paths:
       summary: create a new group
       tags:
       - group
+  /group/join:
+    post:
+      parameters:
+      - description: Join Group Info
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/group.GroupJoinReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.GroupInfoResp'
+      summary: Join a group (create new order)
+      tags:
+      - group
   /group/list:
     get:
       parameters:
@@ -316,6 +351,34 @@ paths:
           schema:
             $ref: '#/definitions/group.GroupInfoResp'
       summary: get groups I joined conditional
+      tags:
+      - group
+  /group/search:
+    get:
+      parameters:
+      - in: query
+        name: group_type
+        type: integer
+      - in: query
+        name: page_num
+        type: integer
+      - in: query
+        name: page_size
+        type: integer
+      - in: query
+        name: search_type
+        type: integer
+      - in: query
+        name: value
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.GroupInfoResp'
+      summary: search exist groups
       tags:
       - group
   /ping:

@@ -1,26 +1,30 @@
 package group_service
 
 import (
-	"ess/model/address"
-	"ess/model/category"
 	"ess/model/group"
 	"ess/model/order"
+	"ess/service/category_service"
 	"ess/utils/db"
 	"ess/utils/logging"
-
-	"github.com/jinzhu/copier"
 )
 
-func QeuryGroupByName(name string) []group.Group {
+func QeuryGroupByName(name string) *[]group.Group {
 	var groups []group.Group
-	resinfo := db.MysqlDB.Where("name = ?", name).Find(&groups)
-	logging.InfoF("Find %d groups\n", resinfo.RowsAffected)
-	return groups
+	resinfo := db.MysqlDB.Where("group_name Like ?", "%"+name+"%").Find(&groups)
+	logging.InfoF("Find %d groups with name %s\n", resinfo.RowsAffected, name)
+	return &groups
+}
+
+func QeuryGroupByCreatorId(cid int) *[]group.Group {
+	var groups []group.Group
+	resinfo := db.MysqlDB.Where(&group.Group{GroupCreatorId: cid}).Find(&groups)
+	logging.InfoF("Find %d groups with creatorID %d\n", resinfo.RowsAffected, cid)
+	return &groups
 }
 
 func QueryGroupById(gid int) *group.Group {
 	var resgroup group.Group
-	resinfo := db.MysqlDB.Where("gid = ?", gid).First(&resgroup)
+	resinfo := db.MysqlDB.Where(&group.Group{GroupId: gid}).First(&resgroup)
 	if resinfo.RowsAffected == 0 {
 		logging.InfoF("No Group with gid %d !\n", gid)
 	}
@@ -28,16 +32,8 @@ func QueryGroupById(gid int) *group.Group {
 	return &resgroup
 }
 
-func QueryGroupAddrById(gid int) *address.Address {
-	var resaddr address.Address
-	var resgroup group.Group
-	resinfo := db.MysqlDB.Model(&resgroup).Where("gid = ?", gid).Association("GroupAddress").Find(&resaddr)
-	logging.Info(resinfo.Error())
-	return &resaddr
-}
-
 func CreateGroup(gp *group.Group) error {
-	if err := db.MysqlDB.Create(gp).Error; err != nil {
+	if err := db.MysqlDB.Select("group_name", "group_description", "group_remark", "group_creator_id", "group_address_id").Create(gp).Error; err != nil {
 		return err
 	}
 	return nil
@@ -51,68 +47,53 @@ func UpdateGroup(gp *group.Group) error {
 }
 
 func CountGroupUserById(gid int) int {
-	var resgroup []group.Group
-	resinfo := db.MysqlDB.Where("gid = ?", gid).Distinct("uid").Find(&resgroup)
+	var resorder []order.Order
+	resinfo := db.MysqlDB.Where(&order.Order{OrderGroupId: gid}).Distinct("order_user_id").Find(&resorder)
 	return int(resinfo.RowsAffected)
 }
 
 func QueryGroupTotalPriceById(gid int) float64 {
 	var resorder []order.Order
-	var rescat []category.Category
 	var result float64 = 0
-	orderinfo := db.MysqlDB.Where("gid = ?", gid).Find(&resorder)
+	orderinfo := db.MysqlDB.Where(&order.Order{OrderGroupId: gid}).Find(&resorder)
 	if orderinfo.RowsAffected == 0 {
 		logging.Info("Group Has No Order!\n")
 		return 0
 	}
-	catinfo := db.MysqlDB.Model(&order.Order{}).Where("gid = ?", gid).Association("OrderCategory").Find(&rescat)
-	logging.Info(catinfo.Error())
-	if len(rescat) != len(resorder) {
-		logging.Fatal("category number != order number\n")
-		return 0
-	}
-	for i := range rescat {
-		result += rescat[i].CategoryPrice * resorder[i].OrderAmount
+
+	for _, ord := range resorder {
+		cat := category_service.QueryCategoryById(ord.OrderCategoryId)
+		result += ord.OrderAmount * cat.CategoryPrice
 	}
 	return result
 }
 
 func QueryGroupUserPriceById(gid int, uid int) float64 {
 	var resorder []order.Order
-	var rescat []category.Category
 	var result float64 = 0
-	orderinfo := db.MysqlDB.Where("gid = ? AND uid = ?", gid, uid).Find(&resorder)
+	orderinfo := db.MysqlDB.Where(&order.Order{OrderGroupId: gid, OrderUserId: uid}).Find(&resorder)
 	if orderinfo.RowsAffected == 0 {
 		logging.Info("Group Has No Order With This Uid!\n")
 		return 0
 	}
-	catinfo := db.MysqlDB.Model(&order.Order{}).Where("gid = ? AND uid = ?", gid, uid).Association("OrderCategory").Find(&rescat)
-	logging.Info(catinfo.Error())
-	if len(rescat) != len(resorder) {
-		logging.Fatal("category number != order number\n")
-		return 0
-	}
-	for i := range rescat {
-		result += rescat[i].CategoryPrice * resorder[i].OrderAmount
+	for _, ord := range resorder {
+		cat := category_service.QueryCategoryById(ord.OrderCategoryId)
+		result += cat.CategoryPrice * ord.OrderAmount
 	}
 	return result
 }
 
-func QueryGroupCategories(gid int) *[]group.GroupInfoCommodity {
-	var groupcat []category.Category
-	var rescat []group.GroupInfoCommodity
-	var tmp group.GroupInfoCommodity
+func QueryGroupCategories(gid int) *[]int {
+	var catids []int
 
-	resinfo := db.MysqlDB.Model(&group.Group{}).Where("gid = ?", gid).Find(&groupcat)
+	resinfo := db.MysqlDB.Raw("SELECT category_category_id FROM group_category WHERE group_group_id = ?", gid).Scan(&catids)
 	if resinfo.RowsAffected == 0 {
-		return &rescat
+		logging.Info("Group Has No Category!\n")
+	} else {
+		logging.InfoF("Find %d categories in group %d \n", resinfo.RowsAffected, gid)
 	}
+	return &catids
 
-	for _, catinfo := range groupcat {
-		_ = copier.Copy(tmp, catinfo)
-		rescat = append(rescat, tmp)
-	}
-	return &rescat
 }
 
 func RiderFinishedCount(uid int) (int64, error) {
