@@ -3,7 +3,7 @@ package user_service
 import (
 	"ess/model/address"
 	"ess/model/user"
-	"ess/utils/amap"
+	"ess/utils/amap_base"
 	"ess/utils/cache"
 	"ess/utils/db"
 	"ess/utils/logging"
@@ -145,7 +145,7 @@ func ValidUser(user user.UserCreateReq) (*address.Address, bool) {
 	var addr address.Address
 	_ = copier.Copy(&addr, &user.UserAddress)
 	addr.AddressUserId = 0 // placeholder
-	err := amap.GetCoordination(&addr)
+	err := amap_base.GetCoordination(&addr)
 	if err != nil {
 		logging.ErrorF("获取坐标失败(%+v): %v\n", addr, err)
 		return &addr, false

@@ -3,11 +3,52 @@ package address_service
 import (
 	"ess/model/address"
 	"ess/model/user"
+	"ess/utils/amap_base"
 	"ess/utils/db"
 )
 
 func CreateAddress(addr *address.Address) error {
-	return db.MysqlDB.Create(addr).Error
+	if !addr.AddressCached {
+		return db.MysqlDB.Create(addr).Error
+	}
+
+	tx := db.MysqlDB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return err
+	}
+
+	if err := tx.Create(addr).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	var addrs []address.Address
+	if err := tx.Where(&address.Address{AddressCached: true}).Find(&addrs).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	for _, other := range addrs {
+		if other.AddressId != addr.AddressId {
+			dis, err := amap_base.DistanceByCoordination(addr.AddressLng, addr.AddressLat, other.AddressLng, other.AddressLat)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+			err = tx.Create(&address.DistanceCache{DistanceCost: dis, DistanceAId: other.AddressId, DistanceBId: addr.AddressId}).Error
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	return tx.Commit().Error
 }
 
 func QueryAddressById(aid int) (*address.Address, error) {

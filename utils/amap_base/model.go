@@ -1,4 +1,4 @@
-package amap
+package amap_base
 
 type NavigationResp struct {
 	Status   string              `json:"status"`

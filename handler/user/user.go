@@ -164,6 +164,7 @@ func CreateUser(c *gin.Context) {
 	var usr user.User
 	_ = copier.Copy(&usr, &req)
 
+	addr.AddressCached = (usr.UserRole == user.Purchaser || usr.UserRole == user.Leader || usr.UserRole == user.Supplier)
 	if err := user_service.CreateUserWithAddress(&usr, addr); err != nil {
 		logging.ErrorF("failed to create user(%+v): %+v\n", usr, err)
 		c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg(err.Error()))

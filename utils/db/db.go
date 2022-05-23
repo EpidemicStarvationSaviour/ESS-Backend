@@ -54,6 +54,9 @@ func Setup() {
 	if err = MysqlDB.AutoMigrate(&address.Address{}); err != nil {
 		logging.Fatal("failed to auto migrate address.Address: ", err)
 	}
+	if err = MysqlDB.AutoMigrate(&address.DistanceCache{}); err != nil {
+		logging.Fatal("failed to auto migrate address.DistanceCache: ", err)
+	}
 	if err = MysqlDB.AutoMigrate(&user.User{}); err != nil {
 		logging.Fatal("failed to auto migrate user.User: ", err)
 	}
