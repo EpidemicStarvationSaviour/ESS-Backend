@@ -11,6 +11,7 @@ import (
 	"ess/service/user_service"
 	"ess/utils/authUtils"
 	"ess/utils/response"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -35,6 +36,7 @@ func GetGroupDetail(grp *group.Group, uid int) (*group.GroupInfoData, error) {
 	resinfo.TotalPrice = group_service.QueryGroupTotalPriceById(grp.GroupId)
 	resinfo.TotalMyPrice = group_service.QueryGroupUserPriceById(grp.GroupId, uid)
 	CategoryIDs := group_service.QueryGroupCategories(grp.GroupId)
+	log.Printf("%+v", CategoryIDs)
 	var commo group.GroupInfoCommodity
 	for _, catid := range *CategoryIDs {
 		copier.Copy(&commo, category_service.QueryCategoryById(catid))
@@ -150,6 +152,7 @@ func LaunchNewGroup(c *gin.Context) {
 	for _, cid := range createinfo.GroupCommodities {
 		groupinfo.GroupCategories = append(groupinfo.GroupCategories, *category_service.QueryCategoryById(cid))
 	}
+	log.Printf("%+v", groupinfo.GroupCategories)
 	if err := group_service.CreateGroup(&groupinfo); err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_GROUP_CREATE_FAIL))
 		return
@@ -177,8 +180,18 @@ func LaunchNewGroup(c *gin.Context) {
 		}
 	}
 
+	// for _, cid := range createinfo.GroupCommodities {
+	// 	err := category_service.AddCategoryGroupRelation(groupinfo.GroupId, cid)
+	// 	if err != nil {
+	// 		logging.Info("INSERT Cat-Group Fail\n")
+	// 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_GROUP_CREATE_FAIL))
+	// 		return
+	// 	}
+	// }
+
 	var res group.GroupCreateResp
 	res.GroupId = groupinfo.GroupId
+
 	c.Set(define.ESSRESPONSE, response.JSONData(&res))
 
 }
@@ -234,6 +247,8 @@ func SearchGroup(c *gin.Context) {
 				result.Data = append(result.Data, *data)
 			}
 		}
+
+		log.Printf("%+v", result)
 
 		c.Set(define.ESSRESPONSE, response.JSONData(&result))
 		return
