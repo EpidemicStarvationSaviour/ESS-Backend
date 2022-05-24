@@ -338,3 +338,37 @@ func JoinGroup(c *gin.Context) {
 
 	}
 }
+
+// @Summary Agent Get Own Groups
+// @Tags	group
+// @Produce json
+// @Param _ query group.GroupInfoReq true "Agent Group Info"
+// @Success 200 {object} group.GroupInfoResp
+// @Router /group/own [get]
+func AgentOwnGroup(c *gin.Context) {
+	claim, _ := c.Get(define.ESSPOLICY)
+	policy, _ := claim.(authUtils.Policy)
+	var groupreq group.GroupInfoReq
+	if err := c.ShouldBind(&groupreq); err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	userID := policy.GetId()
+	var result group.GroupInfoResp
+	mygroup := group_service.QeuryGroupByCreatorId(userID)
+	for _, grp := range *mygroup {
+		if groupreq.Type == 0 || grp.GroupStatus == group.Status(groupreq.Type) {
+			result.Count++
+			data, err := GetGroupDetail(&grp, userID)
+			if err != nil {
+				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+				c.Abort()
+				return
+			}
+			result.Data = append(result.Data, *data)
+		}
+	}
+	c.Set(define.ESSRESPONSE, response.JSONData(&result))
+
+}

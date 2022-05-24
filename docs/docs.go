@@ -106,6 +106,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/group/own": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "Agent Get Own Groups",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "page_num",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/group.GroupInfoResp"
+                        }
+                    }
+                }
+            }
+        },
         "/group/search": {
             "get": {
                 "produces": [

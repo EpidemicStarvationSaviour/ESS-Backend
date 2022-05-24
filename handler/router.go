@@ -54,5 +54,6 @@ func InitRouter() *gin.Engine {
 	groupMod.POST("/create", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.LaunchNewGroup)
 	groupMod.GET("/search", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.SearchGroup)
 	groupMod.POST("/join", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.JoinGroup)
+	groupMod.GET("/own", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.AgentOwnGroup)
 	return r
 }

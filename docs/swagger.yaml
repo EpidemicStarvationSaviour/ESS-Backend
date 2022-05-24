@@ -353,6 +353,28 @@ paths:
       summary: get groups I joined conditional
       tags:
       - group
+  /group/own:
+    get:
+      parameters:
+      - in: query
+        name: page_num
+        type: integer
+      - in: query
+        name: page_size
+        type: integer
+      - in: query
+        name: type
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.GroupInfoResp'
+      summary: Agent Get Own Groups
+      tags:
+      - group
   /group/search:
     get:
       parameters:

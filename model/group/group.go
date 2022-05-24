@@ -25,9 +25,9 @@ type Group struct {
 }
 
 type GroupInfoReq struct {
-	Type     int `json:"type"`
-	PageNum  int `json:"page_num"`
-	PageSize int `json:"page_size"`
+	Type     int `form:"type" json:"type"`
+	PageNum  int `form:"page_num" json:"page_num"`
+	PageSize int `form:"page_size" json:"page_size"`
 }
 
 type GroupInfoAddress struct {
