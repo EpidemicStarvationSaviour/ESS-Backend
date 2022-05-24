@@ -8,7 +8,7 @@ import (
 
 func QueryOrderByUser(uid int) (*[]order.Order, error) {
 	var orders []order.Order
-	if err := db.MysqlDB.Find(&orders, "uid = ?", uid).Error; err != nil {
+	if err := db.MysqlDB.Where(&order.Order{OrderUserId: uid}).Find(&orders).Error; err != nil {
 		return nil, err
 	}
 	return &orders, nil
@@ -23,7 +23,7 @@ func CreateNewOrder(ord *order.Order) error {
 
 func QueryUidByGroup(gid int) (*[]int, error) {
 	var resid []int
-	if err := db.MysqlDB.Model(&order.Order{}).Select([]string{"uid"}).Where(&order.Order{OrderGroupId: gid}).Find(resid).Error; err != nil {
+	if err := db.MysqlDB.Model(&order.Order{}).Select([]string{"order_user_id"}).Distinct([]string{"order_user_id"}).Where(&order.Order{OrderGroupId: gid}).Find(resid).Error; err != nil {
 		return &resid, err
 	}
 	return &resid, nil
@@ -37,4 +37,20 @@ func QueryOrderByGroupCategory(gid int, cid int) *[]order.Order {
 
 	}
 	return &resorder
+}
+
+func QueryOrderByGroup(gid int) (*[]order.Order, error) {
+	var orders []order.Order
+	if err := db.MysqlDB.Where(&order.Order{OrderGroupId: gid}).Find(&orders).Error; err != nil {
+		return nil, err
+	}
+	return &orders, nil
+}
+
+func DeleteOrder(ord *order.Order) error {
+	return db.MysqlDB.Delete(&ord).Error
+}
+
+func DeleteOrderByGroupCategory(gid int, cid int) error {
+	return db.MysqlDB.Where(&order.Order{OrderGroupId: gid, OrderCategoryId: cid}).Delete(&order.Order{}).Error
 }

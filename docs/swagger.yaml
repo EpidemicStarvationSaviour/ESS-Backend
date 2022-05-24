@@ -57,6 +57,27 @@ definitions:
       id:
         type: integer
     type: object
+  group.GroupEditReq:
+    properties:
+      address_id:
+        type: integer
+      commodities:
+        items:
+          type: integer
+        type: array
+      deleted_users:
+        items:
+          type: integer
+        type: array
+      description:
+        type: string
+      name:
+        type: string
+      remark:
+        type: string
+      type:
+        type: integer
+    type: object
   group.GroupInfoAddress:
     properties:
       area:
@@ -122,15 +143,6 @@ definitions:
       type:
         type: integer
       user_number:
-        type: integer
-    type: object
-  group.GroupInfoReq:
-    properties:
-      page_num:
-        type: integer
-      page_size:
-        type: integer
-      type:
         type: integer
     type: object
   group.GroupInfoResp:
@@ -315,6 +327,28 @@ paths:
       summary: create a new group
       tags:
       - group
+  /group/edit/{id}:
+    put:
+      parameters:
+      - description: edit group id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Agent Group Edit
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/group.GroupEditReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: Agent Edit Group
+      tags:
+      - group
   /group/join:
     post:
       parameters:
@@ -337,12 +371,15 @@ paths:
   /group/list:
     get:
       parameters:
-      - description: Group Condition
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/group.GroupInfoReq'
+      - in: query
+        name: page_num
+        type: integer
+      - in: query
+        name: page_size
+        type: integer
+      - in: query
+        name: type
+        type: integer
       produces:
       - application/json
       responses:

@@ -102,3 +102,13 @@ type GroupJoinReq struct {
 	GroupId   int             `json:"id"`
 	OrderData []GroupJoinData `json:"data"`
 }
+
+type GroupEditReq struct {
+	GroupName         string `json:"name"`
+	GroupStatus       Status `json:"type"`
+	GroupDescription  string `json:"description"`
+	GroupRemark       string `json:"remark"`
+	GroupAddressId    int    `json:"address_id"`
+	GroupDeteledUsers []int  `json:"deleted_users"`
+	GroupCommodityIds []int  `json:"commodities"`
+}

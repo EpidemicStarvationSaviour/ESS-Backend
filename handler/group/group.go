@@ -10,6 +10,7 @@ import (
 	"ess/service/order_service"
 	"ess/service/user_service"
 	"ess/utils/authUtils"
+	"ess/utils/logging"
 	"ess/utils/response"
 	"log"
 
@@ -57,7 +58,7 @@ func GetGroupDetail(grp *group.Group, uid int) (*group.GroupInfoData, error) {
 // @Summary get groups I joined conditional
 // @Tags	group
 // @Produce json
-// @Param data body group.GroupInfoReq true "Group Condition"
+// @Param _ query group.GroupInfoReq true "Group Condition"
 // @Success 200 {object} group.GroupInfoResp
 // @Router /group/list [get]
 func GetMyGroup(c *gin.Context) {
@@ -89,7 +90,7 @@ func GetMyGroup(c *gin.Context) {
 	for _, order := range *Orders {
 		retgroup := group_service.QueryGroupById(order.OrderGroupId)
 
-		if retgroup.GroupStatus == group.Status(groupcondition.Type) {
+		if groupcondition.Type == 0 || retgroup.GroupStatus == group.Status(groupcondition.Type) {
 			data, err := GetGroupDetail(retgroup, userinfo.UserId)
 			if err != nil {
 				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
@@ -171,6 +172,7 @@ func LaunchNewGroup(c *gin.Context) {
 			for _, cid := range createinfo.GroupCommodities {
 				neworder.OrderCategoryId = cid
 				neworder.OrderUserId = uid
+				// neworder.OrderUserId = ord.OrderUserId
 				err := order_service.CreateNewOrder(&neworder)
 				if err != nil {
 					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_GROUP_CREATE_FAIL))
@@ -371,4 +373,92 @@ func AgentOwnGroup(c *gin.Context) {
 	}
 	c.Set(define.ESSRESPONSE, response.JSONData(&result))
 
+}
+
+// @Summary Agent Edit Group
+// @Tags	group
+// @Produce json
+// @Param id path int true "edit group id"
+// @Param data body group.GroupEditReq true "Agent Group Edit"
+// @Success 200
+// @Router /group/edit/{id} [put]
+func EditGroup(c *gin.Context) {
+	claim, _ := c.Get(define.ESSPOLICY)
+	policy, _ := claim.(authUtils.Policy)
+	var newgroup group.Group
+	newgroup.GroupId = c.GetInt(c.Param("id"))
+
+	log.Printf("input id = %d \n", newgroup.GroupId)
+	newgroup = *group_service.QueryGroupById(newgroup.GroupId)
+
+	var editinfo group.GroupEditReq
+	if err := c.ShouldBind(&editinfo); err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	userID := policy.GetId()
+
+	copier.Copy(&newgroup, editinfo)
+
+	if newgroup.GroupCreatorId != userID {
+		logging.ErrorF("the creator %d does not match the user %d!\n", newgroup.GroupCreatorId, userID)
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+
+	groupords, err := order_service.QueryOrderByGroup(userID)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	for _, deleteusr := range editinfo.GroupDeteledUsers {
+		for _, ord := range *groupords {
+			if deleteusr == ord.OrderUserId {
+				err := order_service.DeleteOrder(&ord)
+				if err != nil {
+					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+					c.Abort()
+					return
+				}
+
+			}
+		}
+	}
+	for i := range editinfo.GroupCommodityIds {
+		for j := range newgroup.GroupCategories {
+			if editinfo.GroupCommodityIds[i] == newgroup.GroupCategories[j].CategoryId {
+				editinfo.GroupCommodityIds[i] = -1
+				newgroup.GroupCategories[j].CategoryId = -newgroup.GroupCategories[j].CategoryId
+			}
+		}
+	}
+	var idx = 0
+	for idx < len(newgroup.GroupCategories) {
+		if newgroup.GroupCategories[idx].CategoryId > 0 {
+			err := order_service.DeleteOrderByGroupCategory(newgroup.GroupId, newgroup.GroupCategories[idx].CategoryId)
+			if err != nil {
+				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+				c.Abort()
+				return
+			}
+			newgroup.GroupCategories = append(newgroup.GroupCategories[:idx], newgroup.GroupCategories[idx+1:]...)
+		} else {
+			newgroup.GroupCategories[idx].CategoryId = -newgroup.GroupCategories[idx].CategoryId
+			idx++
+		}
+	}
+	for i := range editinfo.GroupCommodityIds {
+		if editinfo.GroupCommodityIds[i] > 0 {
+			newgroup.GroupCategories = append(newgroup.GroupCategories, *category_service.QueryCategoryById(editinfo.GroupCommodityIds[i]))
+		}
+	}
+	err = group_service.UpdateGroup(&newgroup)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
 }

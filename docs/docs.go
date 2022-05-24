@@ -46,6 +46,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/group/edit/{id}": {
+            "put": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "Agent Edit Group",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "edit group id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Agent Group Edit",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.GroupEditReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/group/join": {
             "post": {
                 "produces": [
@@ -87,13 +121,19 @@ const docTemplate = `{
                 "summary": "get groups I joined conditional",
                 "parameters": [
                     {
-                        "description": "Group Condition",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/group.GroupInfoReq"
-                        }
+                        "type": "integer",
+                        "name": "page_num",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "type",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -536,6 +576,38 @@ const docTemplate = `{
                 }
             }
         },
+        "group.GroupEditReq": {
+            "type": "object",
+            "properties": {
+                "address_id": {
+                    "type": "integer"
+                },
+                "commodities": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "deleted_users": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
         "group.GroupInfoAddress": {
             "type": "object",
             "properties": {
@@ -634,20 +706,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "user_number": {
-                    "type": "integer"
-                }
-            }
-        },
-        "group.GroupInfoReq": {
-            "type": "object",
-            "properties": {
-                "page_num": {
-                    "type": "integer"
-                },
-                "page_size": {
-                    "type": "integer"
-                },
-                "type": {
                     "type": "integer"
                 }
             }
