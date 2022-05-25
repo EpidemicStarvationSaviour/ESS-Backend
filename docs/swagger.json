@@ -4,6 +4,42 @@
         "contact": {}
     },
     "paths": {
+        "/admin/users": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "get all users conditionally",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "page_num",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.AllUserResp"
+                        }
+                    }
+                }
+            }
+        },
         "/group/create": {
             "post": {
                 "produces": [
@@ -526,6 +562,78 @@
             ],
             "properties": {
                 "address_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AllUserResp": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.UserData"
+                    }
+                }
+            }
+        },
+        "admin.UserAddress": {
+            "type": "object",
+            "properties": {
+                "area": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_default": {
+                    "type": "boolean"
+                },
+                "lat": {
+                    "type": "number"
+                },
+                "lng": {
+                    "type": "number"
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
+        "admin.UserData": {
+            "type": "object",
+            "properties": {
+                "user_address": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin.UserAddress"
+                    }
+                },
+                "user_created_time": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "user_name": {
+                    "type": "string"
+                },
+                "user_phone": {
+                    "type": "string"
+                },
+                "user_role": {
+                    "type": "integer"
+                },
+                "user_updated_time": {
                     "type": "integer"
                 }
             }

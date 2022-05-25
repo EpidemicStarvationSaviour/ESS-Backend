@@ -2,6 +2,7 @@ package handler
 
 import (
 	"ess/handler/address"
+	"ess/handler/admin"
 	api_info "ess/handler/api"
 	"ess/handler/group"
 	"ess/handler/token"
@@ -56,5 +57,9 @@ func InitRouter() *gin.Engine {
 	groupMod.POST("/join", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.JoinGroup)
 	groupMod.GET("/own", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.AgentOwnGroup)
 	groupMod.PUT("/edit/:id", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.EditGroup)
+
+	adminMod := api.Group("/admin")
+	adminMod.GET("/users", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), admin.GetAllUsers)
+
 	return r
 }

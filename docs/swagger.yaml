@@ -35,6 +35,53 @@ definitions:
     required:
     - address_id
     type: object
+  admin.AllUserResp:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/admin.UserData'
+        type: array
+    type: object
+  admin.UserAddress:
+    properties:
+      area:
+        type: string
+      city:
+        type: string
+      detail:
+        type: string
+      id:
+        type: integer
+      is_default:
+        type: boolean
+      lat:
+        type: number
+      lng:
+        type: number
+      province:
+        type: string
+    type: object
+  admin.UserData:
+    properties:
+      user_address:
+        items:
+          $ref: '#/definitions/admin.UserAddress'
+        type: array
+      user_created_time:
+        type: integer
+      user_id:
+        type: integer
+      user_name:
+        type: string
+      user_phone:
+        type: string
+      user_role:
+        type: integer
+      user_updated_time:
+        type: integer
+    type: object
   group.GroupCreateReq:
     properties:
       address_id:
@@ -308,6 +355,28 @@ definitions:
 info:
   contact: {}
 paths:
+  /admin/users:
+    get:
+      parameters:
+      - in: query
+        name: page_num
+        type: integer
+      - in: query
+        name: page_size
+        type: integer
+      - in: query
+        name: type
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.AllUserResp'
+      summary: get all users conditionally
+      tags:
+      - admin
   /group/create:
     post:
       parameters:
