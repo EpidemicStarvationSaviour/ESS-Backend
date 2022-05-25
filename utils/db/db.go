@@ -75,6 +75,9 @@ func Setup() {
 	if err = MysqlDB.AutoMigrate(&route.Route{}); err != nil {
 		logging.Fatal("failed to auto migrate route.Route: ", err)
 	}
+	if err = MysqlDB.AutoMigrate(&route.RouteItem{}); err != nil {
+		logging.Fatal("failed to auto migrate route.RouteItem: ", err)
+	}
 
 	logging.InfoF("[server] database %s@tcp(%s)/%s connected", dbUser, host, dbName)
 }
