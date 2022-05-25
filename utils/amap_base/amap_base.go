@@ -74,6 +74,7 @@ func GetCoordination(addr *address.Address) error {
 	if !setting.AmapSetting.Enable {
 		addr.AddressLng = 30.263842 + (rand.Float64()-0.5)/0.5*0.2  // +- 0.2
 		addr.AddressLat = 120.123077 + (rand.Float64()-0.5)/0.5*0.2 // +- 0.2
+		return nil
 	}
 	req, err := http.NewRequest("GET", "https://restapi.amap.com/v3/geocode/geo", nil)
 	if err != nil {
