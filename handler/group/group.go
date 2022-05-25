@@ -153,7 +153,6 @@ func LaunchNewGroup(c *gin.Context) {
 	for _, cid := range createinfo.GroupCommodities {
 		groupinfo.GroupCategories = append(groupinfo.GroupCategories, *category_service.QueryCategoryById(cid))
 	}
-	log.Printf("%+v", groupinfo.GroupCategories)
 	if err := group_service.CreateGroup(&groupinfo); err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_GROUP_CREATE_FAIL))
 		return

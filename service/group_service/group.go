@@ -33,7 +33,7 @@ func QueryGroupById(gid int) *group.Group {
 }
 
 func CreateGroup(gp *group.Group) error {
-	if err := db.MysqlDB.Select("group_name", "group_description", "group_remark", "group_creator_id", "group_address_id").Create(gp).Error; err != nil {
+	if err := db.MysqlDB.Select("group_name", "group_description", "group_remark", "group_creator_id", "group_address_id", "GroupCategories").Create(gp).Error; err != nil {
 		return err
 	}
 	return nil
