@@ -35,6 +35,11 @@ definitions:
     required:
     - address_id
     type: object
+  admin.AdminDeleteUser:
+    properties:
+      user_id:
+        type: integer
+    type: object
   admin.AllUserResp:
     properties:
       count:
@@ -356,6 +361,22 @@ info:
   contact: {}
 paths:
   /admin/users:
+    delete:
+      parameters:
+      - description: User Id
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/admin.AdminDeleteUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: delete certain user
+      tags:
+      - admin
     get:
       parameters:
       - in: query

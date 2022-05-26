@@ -119,3 +119,7 @@ func ModifyDefaultAddressIfNeeded(aid int) error {
 
 	return tx.Commit().Error
 }
+
+func DeleteAddressByUser(uid int) error {
+	return db.MysqlDB.Where(&address.Address{AddressUserId: uid}).Delete(&address.Address{}).Error
+}

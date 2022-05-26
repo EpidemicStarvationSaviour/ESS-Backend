@@ -25,3 +25,7 @@ type AllUserResp struct {
 	UserCount int        `json:"count"`
 	UserList  []UserData `json:"data"`
 }
+
+type AdminDeleteUser struct {
+	UserId int `json:"user_id"`
+}

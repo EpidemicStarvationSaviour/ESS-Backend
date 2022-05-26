@@ -7,7 +7,13 @@ import (
 	"ess/model/user"
 	"ess/service/address_service"
 	"ess/service/admin_service"
+	"ess/service/group_service"
+	"ess/service/item_service"
+	"ess/service/order_service"
+	"ess/service/route_service"
+	"ess/service/user_service"
 	"ess/utils/response"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -72,4 +78,101 @@ func GetAllUsers(c *gin.Context) {
 		result.UserList = append(result.UserList, data)
 	}
 	c.Set(define.ESSRESPONSE, response.JSONData(&result))
+}
+
+// @Summary delete certain user
+// @Tags	admin
+// @Produce json
+// @Param data body admin.AdminDeleteUser true "User Id"
+// @Success 200
+// @Router /admin/users [delete]
+func DeleteUser(c *gin.Context) {
+	log.Print("0\n")
+	var DeleteUserId admin.AdminDeleteUser
+	if err := c.ShouldBind(&DeleteUserId); err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	log.Print("1\n")
+	// order
+	err := order_service.DeleteOrderByUser(DeleteUserId.UserId)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	log.Print("2\n")
+	// route
+	deleteroutes, err := route_service.QueryRouteByUser(DeleteUserId.UserId)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	for _, rt := range *deleteroutes {
+		err := route_service.DeleteRouteItemById(rt.RouteId)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Abort()
+			return
+		}
+		err = route_service.DeleteRouteById(rt.RouteId)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Abort()
+			return
+		}
+	}
+	log.Print("3\n")
+	// group
+	createdgroup := group_service.QeuryGroupByCreatorId(DeleteUserId.UserId)
+	for _, gp := range *createdgroup {
+		rts, err := route_service.QeuryRouteByGroupId(gp.GroupId)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Abort()
+		}
+
+		if len(*rts) > 0 {
+			for _, rt := range *rts {
+				err = route_service.DeleteRouteItemById(rt.RouteId)
+				if err != nil {
+					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+					c.Abort()
+				}
+			}
+		}
+
+		err = route_service.DeleteRouteByGroupId(gp.GroupId)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Abort()
+		}
+	}
+
+	log.Print("4\n")
+	// address
+	err = address_service.DeleteAddressByUser(DeleteUserId.UserId)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+	}
+
+	log.Print("5\n")
+	// item
+	err = item_service.DeleteItemByUserId(DeleteUserId.UserId)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+	}
+
+	log.Print("6\n")
+	// user
+	err = user_service.DeleteUserById(DeleteUserId.UserId)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+	}
+
 }

@@ -50,6 +50,31 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "delete certain user",
+                "parameters": [
+                    {
+                        "description": "User Id",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.AdminDeleteUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
             }
         },
         "/group/create": {
@@ -574,6 +599,14 @@ const docTemplate = `{
             ],
             "properties": {
                 "address_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "admin.AdminDeleteUser": {
+            "type": "object",
+            "properties": {
+                "user_id": {
                     "type": "integer"
                 }
             }

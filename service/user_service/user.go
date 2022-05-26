@@ -185,3 +185,7 @@ func CreateUserWithAddress(user *user.User, addr *address.Address) error {
 
 	return tx.Commit().Error
 }
+
+func DeleteUserById(uid int) error {
+	return db.MysqlDB.Where(&user.User{UserId: uid}).Delete(&user.User{UserId: uid}).Error
+}

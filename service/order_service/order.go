@@ -54,3 +54,7 @@ func DeleteOrder(ord *order.Order) error {
 func DeleteOrderByGroupCategory(gid int, cid int) error {
 	return db.MysqlDB.Where(&order.Order{OrderGroupId: gid, OrderCategoryId: cid}).Delete(&order.Order{}).Error
 }
+
+func DeleteOrderByUser(uid int) error {
+	return db.MysqlDB.Where(&order.Order{OrderUserId: uid}).Delete(&order.Order{}).Error
+}

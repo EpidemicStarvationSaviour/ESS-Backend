@@ -60,6 +60,7 @@ func InitRouter() *gin.Engine {
 
 	adminMod := api.Group("/admin")
 	adminMod.GET("/users", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), admin.GetAllUsers)
+	adminMod.DELETE("/users", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), admin.DeleteUser)
 
 	return r
 }
