@@ -1,4 +1,4 @@
-FROM paciolanadmin/golang-alpine
+FROM goland:1.18-alpine
 EXPOSE 50051
 WORKDIR /workspace
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
@@ -11,6 +11,7 @@ ENV GO111MODULE=on \
 COPY go.mod go.mod
 COPY go.sum go.sum
 RUN go mod download
+RUN go mod tidy
 # src code
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build -o ess-backend .
