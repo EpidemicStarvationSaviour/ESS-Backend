@@ -13,7 +13,6 @@ import (
 	"ess/service/route_service"
 	"ess/service/user_service"
 	"ess/utils/response"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -87,14 +86,14 @@ func GetAllUsers(c *gin.Context) {
 // @Success 200
 // @Router /admin/users [delete]
 func DeleteUser(c *gin.Context) {
-	log.Print("0\n")
+	// log.Print("0\n")
 	var DeleteUserId admin.AdminDeleteUser
 	if err := c.ShouldBind(&DeleteUserId); err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 		c.Abort()
 		return
 	}
-	log.Print("1\n")
+	// log.Print("1\n")
 	// order
 	err := order_service.DeleteOrderByUser(DeleteUserId.UserId)
 	if err != nil {
@@ -102,7 +101,7 @@ func DeleteUser(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	log.Print("2\n")
+	// log.Print("2\n")
 	// route
 	deleteroutes, err := route_service.QueryRouteByUser(DeleteUserId.UserId)
 	if err != nil {
@@ -124,7 +123,7 @@ func DeleteUser(c *gin.Context) {
 			return
 		}
 	}
-	log.Print("3\n")
+	// log.Print("3\n")
 	// group
 	createdgroup := group_service.QeuryGroupByCreatorId(DeleteUserId.UserId)
 	for _, gp := range *createdgroup {
@@ -149,9 +148,14 @@ func DeleteUser(c *gin.Context) {
 			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 			c.Abort()
 		}
+		err = group_service.DeleteGroupById(gp.GroupId)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Abort()
+		}
 	}
 
-	log.Print("4\n")
+	// log.Print("4\n")
 	// address
 	err = address_service.DeleteAddressByUser(DeleteUserId.UserId)
 	if err != nil {
@@ -159,7 +163,7 @@ func DeleteUser(c *gin.Context) {
 		c.Abort()
 	}
 
-	log.Print("5\n")
+	// log.Print("5\n")
 	// item
 	err = item_service.DeleteItemByUserId(DeleteUserId.UserId)
 	if err != nil {
@@ -167,7 +171,7 @@ func DeleteUser(c *gin.Context) {
 		c.Abort()
 	}
 
-	log.Print("6\n")
+	// log.Print("6\n")
 	// user
 	err = user_service.DeleteUserById(DeleteUserId.UserId)
 	if err != nil {

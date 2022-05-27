@@ -4,6 +4,8 @@ import (
 	"ess/model/address"
 	"ess/model/category"
 	"ess/model/user"
+
+	"gorm.io/gorm"
 )
 
 type Group struct {
@@ -22,6 +24,7 @@ type Group struct {
 	GroupSeenByRider bool                `gorm:"not null;default:false"`
 	GroupCreatedAt   int64               `gorm:"autoCreateTime"`
 	GroupUpdatedAt   int64               `gorm:"autoUpdateTime"`
+	GroupDeleted     gorm.DeletedAt
 }
 
 type GroupInfoReq struct {

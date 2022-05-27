@@ -121,3 +121,7 @@ func PurchaserAndLeaderFinishedCount(uid int) (int64, error) {
 	}
 	return ret, nil
 }
+
+func DeleteGroupById(gid int) error {
+	return db.MysqlDB.Where(&group.Group{GroupId: gid}).Delete(&group.Group{}).Error
+}
