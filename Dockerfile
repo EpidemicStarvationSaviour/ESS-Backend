@@ -1,4 +1,4 @@
-FROM goland:1.18-alpine
+FROM golang:1.18-alpine
 EXPOSE 50051
 WORKDIR /workspace
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
