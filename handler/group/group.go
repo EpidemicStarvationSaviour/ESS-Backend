@@ -4,10 +4,12 @@ import (
 	"ess/define"
 	"ess/model/group"
 	"ess/model/order"
+	"ess/model/user"
 	"ess/service/address_service"
 	"ess/service/category_service"
 	"ess/service/group_service"
 	"ess/service/order_service"
+	"ess/service/route_service"
 	"ess/service/user_service"
 	"ess/utils/authUtils"
 	"ess/utils/logging"
@@ -55,22 +57,16 @@ func GetGroupDetail(grp *group.Group, uid int) (*group.GroupInfoData, error) {
 	return &resinfo, nil
 }
 
-// @Summary get groups I joined conditional
-// @Tags	group
-// @Produce json
-// @Param _ query group.GroupInfoReq true "Group Condition"
-// @Success 200 {object} group.GroupInfoResp
-// @Router /group/list [get]
-func GetMyGroup(c *gin.Context) {
-	claim, _ := c.Get(define.ESSPOLICY)
-	policy, _ := claim.(authUtils.Policy)
-	var groupcondition group.GroupInfoReq
-	if err := c.ShouldBind(&groupcondition); err != nil {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
-		c.Abort()
-		return
-	}
-	userID := policy.GetId()
+func GetUserAgentGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID int) {
+	// claim, _ := c.Get(define.ESSPOLICY)
+	// policy, _ := claim.(authUtils.Policy)
+	// var groupcondition group.GroupInfoReq
+	// if err := c.ShouldBind(&groupcondition); err != nil {
+	// 	c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+	// 	c.Abort()
+	// 	return
+	// }
+	// userID := policy.GetId()
 
 	userinfo, err := user_service.GetUserById(userID)
 	if err != nil {
@@ -98,24 +94,6 @@ func GetMyGroup(c *gin.Context) {
 				return
 			}
 			result.Count++
-			// groupinfo, userID
-			// groupaddr := group_service.QueryGroupAddrById(order.OrderGroupId)
-
-			// creatorinfo, err := user_service.GetUserById(retgroup.GroupCreatorId)
-			// if err != nil {
-			// 	c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
-			// 	c.Abort()
-			// 	return
-			// }
-			// result.Count++
-			// _ = copier.Copy(&data, retgroup)
-			// _ = copier.Copy(&data, creatorinfo)
-			// _ = copier.Copy(&data.CreatorAddr, groupaddr)
-			// data.UserNumber = group_service.CountGroupUserById(retgroup.GroupId)
-			// data.TotalPrice = group_service.QueryGroupTotalPriceById(retgroup.GroupId)
-			// data.TotalMyPrice = group_service.QueryGroupUserPriceById(retgroup.GroupId, userinfo.UserId)
-			// data.Commodities = *group_service.QueryGroupCategories(retgroup.GroupId)
-
 			result.Data = append(result.Data, *data)
 		}
 	}
@@ -180,15 +158,6 @@ func LaunchNewGroup(c *gin.Context) {
 			}
 		}
 	}
-
-	// for _, cid := range createinfo.GroupCommodities {
-	// 	err := category_service.AddCategoryGroupRelation(groupinfo.GroupId, cid)
-	// 	if err != nil {
-	// 		logging.Info("INSERT Cat-Group Fail\n")
-	// 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_GROUP_CREATE_FAIL))
-	// 		return
-	// 	}
-	// }
 
 	var res group.GroupCreateResp
 	res.GroupId = groupinfo.GroupId
@@ -459,5 +428,99 @@ func EditGroup(c *gin.Context) {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 		c.Abort()
 		return
+	}
+}
+
+func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID int) {
+	// userinfo, err := user_service.GetUserById(userID)
+	// if err != nil {
+	// 	c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+	// 	c.Abort()
+	// 	return
+	// }
+	routes, err := route_service.QueryRouteByUser(userID)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+
+	var result group.GroupInfoSupplierResp
+	for _, rt := range *routes {
+		retgroup := group_service.QueryGroupById(rt.RouteGroupId)
+
+		if groupcondition.Type == 0 || ((retgroup.GroupStatus == 1 || retgroup.GroupStatus == 2) && groupcondition.Type == 1) || (retgroup.GroupStatus == 3 && groupcondition.Type == 2) || (retgroup.GroupStatus == 4 && groupcondition.Type == 3) {
+			result.Count++
+			var data group.GroupInfoSupplierData
+			copier.Copy(&data, &retgroup)
+			creator := user_service.QueryUserById(retgroup.GroupCreatorId)
+			data.GroupCreatorPhone = creator.UserPhone
+			data.GroupCreatorName = creator.UserName
+			items, err := route_service.QueryRouteItem(rt.RouteId)
+			if err != nil {
+				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+				c.Abort()
+				return
+			}
+			for _, it := range *items {
+				cat := category_service.QueryCategoryById(it.RouteItemCategoryId)
+				data.GroupTotalPrice += cat.CategoryPrice * it.RouteItemAmount
+				var commo group.GroupInfoSupplierCommodity
+				copier.Copy(&commo, cat)
+				commo.RouteId = rt.RouteId
+				commo.RouteAmount = it.RouteItemAmount
+				data.GroupCommodity = append(data.GroupCommodity, commo)
+			}
+			if retgroup.GroupRiderId != 0 {
+				grouprider := user_service.QueryUserById(retgroup.GroupRiderId)
+				data.GroupRiderName = grouprider.UserName
+				data.GroupRiderPhone = grouprider.UserPhone
+				riderpos, err := address_service.QueryAddressById(grouprider.UserId)
+				if err != nil {
+					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+					c.Abort()
+					return
+				}
+				copier.Copy(&data.GroupRiderPos, riderpos)
+				data.GroupRiderPos.RouteEstimatedTime = rt.RouteEstimatedTime
+			}
+			result.GroupData = append(result.GroupData, data)
+		}
+	}
+	c.Set(define.ESSRESPONSE, response.JSONData(&result))
+}
+
+// @Summary get groups I joined conditional
+// @Tags	group
+// @Produce json
+// @Param _ query group.GroupInfoReq true "Group Condition"
+// @Success 200 {object} group.GroupInfoResp
+// @Router /group/list [get]
+func GroupInfo(c *gin.Context) {
+	claim, _ := c.Get(define.ESSPOLICY)
+	policy, _ := claim.(authUtils.Policy)
+	var groupcondition group.GroupInfoReq
+	if err := c.ShouldBind(&groupcondition); err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	userID := policy.GetId()
+	role := policy.ConvertToUser().UserRole
+	log.Printf("userID: %d\n", userID)
+	log.Printf("role: %d\n", role)
+	switch role {
+	case user.Purchaser:
+		{
+			GetUserAgentGroup(c, groupcondition, userID)
+		}
+	case user.Leader:
+		{
+			GetUserAgentGroup(c, groupcondition, userID)
+		}
+	case user.Supplier:
+		{
+			GetSupplierGroup(c, groupcondition, userID)
+		}
 	}
 }

@@ -35,3 +35,9 @@ func DeleteRouteByGroupId(gid int) error {
 	return db.MysqlDB.Where(&route.Route{RouteGroupId: gid}).Delete(&route.Route{}).Error
 
 }
+
+func QueryRouteItem(rid int) (*[]route.RouteItem, error) {
+	var result []route.RouteItem
+	err := db.MysqlDB.Where(&route.RouteItem{RouteId: rid}).Find(&result).Error
+	return &result, err
+}

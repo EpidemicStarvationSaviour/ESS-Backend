@@ -115,3 +115,39 @@ type GroupEditReq struct {
 	GroupDeteledUsers []int  `json:"deleted_users"`
 	GroupCommodityIds []int  `json:"commodities"`
 }
+
+type GroupInfoSupplierCommodity struct {
+	CategoryId       int     `json:"type_id"`
+	RouteId          int     `json:"id"`
+	CategoryName     string  `json:"name"`
+	CategoryImageUrl string  `json:"avatar"`
+	CategoryPrice    float64 `json:"price"`
+	RouteAmount      float64 `json:"number"`
+}
+
+type GroupRiderAddress struct {
+	AddressLat         float64 `json:"lat"`
+	AddressLng         float64 `json:"lng"`
+	AddressUpdatedAt   int64   `json:"update_time"`
+	RouteEstimatedTime int64   `json:"eta"`
+}
+
+type GroupInfoSupplierData struct {
+	GroupId           int                          `json:"id"`
+	GroupName         string                       `json:"name"`
+	GroupStatus       Status                       `json:"type"`
+	GroupCreatorId    int                          `json:"creator_id"`
+	GroupCreatorName  string                       `json:"creator_name"`
+	GroupCreatorPhone string                       `json:"creator_phone"`
+	GroupTotalPrice   float64                      `json:"total_price"`
+	GroupRemark       string                       `json:"remark"`
+	GroupCommodity    []GroupInfoSupplierCommodity `json:"commodity_detail"`
+	GroupRiderPhone   string                       `json:"rider_phone"`
+	GroupRiderName    string                       `json:"rider_name"`
+	GroupRiderPos     GroupRiderAddress            `json:"rider_pos"`
+}
+
+type GroupInfoSupplierResp struct {
+	Count     int                     `json:"count"`
+	GroupData []GroupInfoSupplierData `json:"data"`
+}

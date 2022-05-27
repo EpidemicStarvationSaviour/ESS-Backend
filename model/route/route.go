@@ -14,7 +14,7 @@ type Route struct {
 	RouteIndex         uint        `gorm:"not null"`
 	RouteUser          user.User   `gorm:"foreignKey:RouteUserId"`
 	RouteUserId        int         `gorm:"not null"`
-	RouteItems         []RouteItem `gorm:"not null;foreignKey:RouteId"`
+	RouteItems         []RouteItem `gorm:"foreignKey:RouteId"`
 	RouteEstimatedTime int64       `gorm:"not null;check:route_estimated_time>=0"` // seconds
 	RouteDone          bool        `gorm:"not null;default:0"`
 	RouteFinishedAt    time.Time   `gorm:""`
