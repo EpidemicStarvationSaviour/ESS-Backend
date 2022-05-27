@@ -1,4 +1,4 @@
-FROM damianoneill/golang-alpine-builder
+FROM paciolanadmin/golang-alpine
 EXPOSE 50051
 WORKDIR /workspace
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
