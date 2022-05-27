@@ -490,7 +490,40 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 	c.Set(define.ESSRESPONSE, response.JSONData(&result))
 }
 
-// @Summary get groups I joined conditional
+func GetRiderGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID int) {
+	mygroup, err := group_service.QueryGroupByRider(userID)
+	var result group.GroupInfoRiderResp
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+
+	for _, gp := range *mygroup {
+		if groupcondition.Type == 0 || groupcondition.Type+1 == int(gp.GroupStatus) {
+			var data group.GroupInfoRiderData
+			copier.Copy(&data, &gp)
+			creator := user_service.QueryUserById(gp.GroupCreatorId)
+			data.GroupCreatorName = creator.UserName
+			data.GroupCreatorPhone = creator.UserPhone
+			gpaddr, err := address_service.QueryAddressById(gp.GroupAddressId)
+			if err != nil {
+				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+				c.Abort()
+				return
+			}
+			copier.Copy(&data.GroupCreatorAddress, gpaddr)
+			price := group_service.QueryGroupTotalPriceById(gp.GroupId)
+			log.Printf("price= %f\n", price)
+			data.GroupReward = 0.1 * price
+			result.Count++
+			result.GroupData = append(result.GroupData, data)
+		}
+	}
+	c.Set(define.ESSRESPONSE, response.JSONData(&result))
+}
+
+// @Summary get groups related to me
 // @Tags	group
 // @Produce json
 // @Param _ query group.GroupInfoReq true "Group Condition"
@@ -521,6 +554,10 @@ func GroupInfo(c *gin.Context) {
 	case user.Supplier:
 		{
 			GetSupplierGroup(c, groupcondition, userID)
+		}
+	case user.Rider:
+		{
+			GetRiderGroup(c, groupcondition, userID)
 		}
 	}
 }

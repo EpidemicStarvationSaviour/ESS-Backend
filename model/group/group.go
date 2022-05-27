@@ -151,3 +151,30 @@ type GroupInfoSupplierResp struct {
 	Count     int                     `json:"count"`
 	GroupData []GroupInfoSupplierData `json:"data"`
 }
+
+type GroupCreatorAddress struct {
+	AddressId       int     `json:"id"`
+	AddressProvince string  `json:"province"`
+	AddressCity     string  `json:"city"`
+	AddressArea     string  `json:"area"`
+	AddressDetail   string  `json:"detail"`
+	AddressLat      float64 `json:"lat"`
+	AddressLng      float64 `json:"lng"`
+}
+
+type GroupInfoRiderData struct {
+	GroupId             int                 `json:"id"`
+	GroupName           string              `json:"name"`
+	GroupStatus         Status              `json:"type"`
+	GroupCreatorId      int                 `json:"creator_id"`
+	GroupCreatorName    string              `json:"creator_name"`
+	GroupCreatorPhone   string              `json:"creator_phone"`
+	GroupCreatorAddress GroupCreatorAddress `json:"creator_address"`
+	GroupRemark         string              `json:"remark"`
+	GroupReward         float64             `json:"reward"`
+}
+
+type GroupInfoRiderResp struct {
+	Count     int                  `json:"count"`
+	GroupData []GroupInfoRiderData `json:"data"`
+}

@@ -179,7 +179,7 @@ const docTemplate = `{
                 "tags": [
                     "group"
                 ],
-                "summary": "get groups I joined conditional",
+                "summary": "get groups related to me",
                 "parameters": [
                     {
                         "type": "integer",

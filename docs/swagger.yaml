@@ -477,7 +477,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/group.GroupInfoResp'
-      summary: get groups I joined conditional
+      summary: get groups related to me
       tags:
       - group
   /group/own:

@@ -125,3 +125,9 @@ func PurchaserAndLeaderFinishedCount(uid int) (int64, error) {
 func DeleteGroupById(gid int) error {
 	return db.MysqlDB.Where(&group.Group{GroupId: gid}).Delete(&group.Group{}).Error
 }
+
+func QueryGroupByRider(rid int) (*[]group.Group, error) {
+	var result []group.Group
+	err := db.MysqlDB.Where(&group.Group{GroupRiderId: rid}).Find(&result).Error
+	return &result, err
+}
