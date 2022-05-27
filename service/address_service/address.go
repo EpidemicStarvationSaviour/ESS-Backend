@@ -123,3 +123,15 @@ func ModifyDefaultAddressIfNeeded(aid int) error {
 func DeleteAddressByUser(uid int) error {
 	return db.MysqlDB.Where(&address.Address{AddressUserId: uid}).Delete(&address.Address{}).Error
 }
+
+func QueryDistanceCacheByAid(a_aid, b_aid int) (uint64, error) {
+	if a_aid > b_aid {
+		a_aid, b_aid = b_aid, a_aid
+	}
+	var cache address.DistanceCache
+	err := db.MysqlDB.Where(&address.DistanceCache{DistanceAId: a_aid, DistanceBId: b_aid}).First(&cache).Error
+	if err != nil {
+		return 0, err
+	}
+	return cache.DistanceCost, nil
+}

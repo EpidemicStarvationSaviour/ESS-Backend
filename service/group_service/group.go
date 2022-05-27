@@ -3,9 +3,15 @@ package group_service
 import (
 	"ess/model/group"
 	"ess/model/order"
+	"ess/service/address_service"
 	"ess/service/category_service"
+	"ess/service/order_service"
+	"ess/service/user_service"
 	"ess/utils/db"
 	"ess/utils/logging"
+	"log"
+
+	"github.com/jinzhu/copier"
 )
 
 func QeuryGroupByName(name string) *[]group.Group {
@@ -130,4 +136,42 @@ func QueryGroupByRider(rid int) (*[]group.Group, error) {
 	var result []group.Group
 	err := db.MysqlDB.Where(&group.Group{GroupRiderId: rid}).Find(&result).Error
 	return &result, err
+}
+
+func GetGroupDetail(grp *group.Group, uid int) (*group.GroupInfoData, error) {
+	var resinfo group.GroupInfoData
+	groupaddr, err := address_service.QueryAddressById(grp.GroupAddressId)
+	if err != nil {
+		return &resinfo, err
+	}
+
+	creatorinfo, err := user_service.GetUserById(grp.GroupCreatorId)
+	if err != nil {
+		return &resinfo, err
+	}
+
+	_ = copier.Copy(&resinfo, grp)
+	_ = copier.Copy(&resinfo, &creatorinfo)
+	_ = copier.Copy(&resinfo.CreatorAddr, &groupaddr)
+	resinfo.UserNumber = CountGroupUserById(grp.GroupId)
+	resinfo.TotalPrice = QueryGroupTotalPriceById(grp.GroupId)
+	resinfo.TotalMyPrice = QueryGroupUserPriceById(grp.GroupId, uid)
+	CategoryIDs := QueryGroupCategories(grp.GroupId)
+	log.Printf("%+v", CategoryIDs)
+	var commo group.GroupInfoCommodity
+	for _, catid := range *CategoryIDs {
+		copier.Copy(&commo, category_service.QueryCategoryById(catid))
+		// TODO
+		commo.OrderAmount = 0
+		orders := order_service.QueryOrderByGroupCategory(grp.GroupId, catid)
+		for _, ord := range *orders {
+			commo.TotalAmount += ord.OrderAmount
+			if ord.OrderUserId == uid {
+				commo.OrderAmount = ord.OrderAmount
+			}
+		}
+
+		resinfo.Commodities = append(resinfo.Commodities, commo)
+	}
+	return &resinfo, nil
 }

@@ -189,3 +189,15 @@ func CreateUserWithAddress(user *user.User, addr *address.Address) error {
 func DeleteUserById(uid int) error {
 	return db.MysqlDB.Where(&user.User{UserId: uid}).Delete(&user.User{UserId: uid}).Error
 }
+
+func QueryAvailableRiders() ([]user.User, error) {
+	var ret []user.User
+	err := db.MysqlDB.Model(&user.User{}).Where(&user.User{UserRole: user.Rider, UserAvailable: true}).Find(&ret).Error
+	return ret, err
+}
+
+func QueryUsersByRole(role user.Role) ([]user.User, error) {
+	var ret []user.User
+	err := db.MysqlDB.Model(&user.User{}).Where(&user.User{UserRole: role}).Find(&ret).Error
+	return ret, err
+}

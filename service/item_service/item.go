@@ -8,3 +8,9 @@ import (
 func DeleteItemByUserId(uid int) error {
 	return db.MysqlDB.Where(&item.Item{ItemUserId: uid}).Delete(&item.Item{}).Error
 }
+
+func QueryItemsByUserId(uid int) ([]item.Item, error) {
+	var items []item.Item
+	err := db.MysqlDB.Where(&item.Item{ItemUserId: uid}).Find(&items).Error
+	return items, err
+}

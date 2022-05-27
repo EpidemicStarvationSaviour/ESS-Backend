@@ -20,43 +20,6 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-func GetGroupDetail(grp *group.Group, uid int) (*group.GroupInfoData, error) {
-	var resinfo group.GroupInfoData
-	groupaddr, err := address_service.QueryAddressById(grp.GroupAddressId)
-	if err != nil {
-		return &resinfo, err
-	}
-
-	creatorinfo, err := user_service.GetUserById(grp.GroupCreatorId)
-	if err != nil {
-		return &resinfo, err
-	}
-
-	_ = copier.Copy(&resinfo, grp)
-	_ = copier.Copy(&resinfo, &creatorinfo)
-	_ = copier.Copy(&resinfo.CreatorAddr, &groupaddr)
-	resinfo.UserNumber = group_service.CountGroupUserById(grp.GroupId)
-	resinfo.TotalPrice = group_service.QueryGroupTotalPriceById(grp.GroupId)
-	resinfo.TotalMyPrice = group_service.QueryGroupUserPriceById(grp.GroupId, uid)
-	CategoryIDs := group_service.QueryGroupCategories(grp.GroupId)
-	log.Printf("%+v", CategoryIDs)
-	var commo group.GroupInfoCommodity
-	for _, catid := range *CategoryIDs {
-		copier.Copy(&commo, category_service.QueryCategoryById(catid))
-		// TODO
-		orders := order_service.QueryOrderByGroupCategory(grp.GroupId, catid)
-		for _, ord := range *orders {
-			commo.TotalAmount += ord.OrderAmount
-			if ord.OrderUserId == uid {
-				commo.OrderAmount = ord.OrderAmount
-			}
-		}
-
-		resinfo.Commodities = append(resinfo.Commodities, commo)
-	}
-	return &resinfo, nil
-}
-
 func GetUserAgentGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID int) {
 	// claim, _ := c.Get(define.ESSPOLICY)
 	// policy, _ := claim.(authUtils.Policy)
@@ -87,7 +50,7 @@ func GetUserAgentGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID
 		retgroup := group_service.QueryGroupById(order.OrderGroupId)
 
 		if groupcondition.Type == 0 || retgroup.GroupStatus == group.Status(groupcondition.Type) {
-			data, err := GetGroupDetail(retgroup, userinfo.UserId)
+			data, err := group_service.GetGroupDetail(retgroup, userinfo.UserId)
 			if err != nil {
 				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 				c.Abort()
@@ -189,7 +152,7 @@ func SearchGroup(c *gin.Context) {
 
 		for _, retgroup := range *groups {
 			if searchinfo.GroupType == 0 || retgroup.GroupStatus == group.Status(searchinfo.GroupType) {
-				data, err := GetGroupDetail(&retgroup, userID)
+				data, err := group_service.GetGroupDetail(&retgroup, userID)
 				if err != nil {
 					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 					c.Abort()
@@ -230,7 +193,7 @@ func SearchGroup(c *gin.Context) {
 
 		for _, retgroup := range *groups {
 			if retgroup.GroupStatus == group.Status(searchinfo.GroupType) {
-				data, err := GetGroupDetail(&retgroup, userID)
+				data, err := group_service.GetGroupDetail(&retgroup, userID)
 				if err != nil {
 					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 					c.Abort()
@@ -330,7 +293,7 @@ func AgentOwnGroup(c *gin.Context) {
 	for _, grp := range *mygroup {
 		if groupreq.Type == 0 || grp.GroupStatus == group.Status(groupreq.Type) {
 			result.Count++
-			data, err := GetGroupDetail(&grp, userID)
+			data, err := group_service.GetGroupDetail(&grp, userID)
 			if err != nil {
 				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 				c.Abort()
