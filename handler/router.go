@@ -57,6 +57,7 @@ func InitRouter() *gin.Engine {
 	groupMod.POST("/join", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.JoinGroup)
 	groupMod.GET("/own", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.AgentOwnGroup)
 	groupMod.PUT("/edit/:id", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.EditGroup)
+	groupMod.GET("/details/:id", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.GetDetailInfo)
 
 	adminMod := api.Group("/admin")
 	adminMod.GET("/users", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), admin.GetAllUsers)

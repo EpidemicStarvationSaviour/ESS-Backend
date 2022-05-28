@@ -524,3 +524,31 @@ func GroupInfo(c *gin.Context) {
 		}
 	}
 }
+
+func AgentGetDetail(uid int, gid int) {
+
+}
+
+// @Summary Agent/Rider get detail
+// @Tags	group
+// @Produce json
+// @Param id path int true "edit group id"
+// @Success 200
+// @Router /group/details/{id} [put]
+func GetDetailInfo(c *gin.Context) {
+	claim, _ := c.Get(define.ESSPOLICY)
+	policy, _ := claim.(authUtils.Policy)
+	GroupId := c.GetInt(c.Param("id"))
+	UserId := policy.GetId()
+	switch policy.ConvertToUser().UserRole {
+	case user.Leader:
+		{
+			AgentGetDetail(UserId, GroupId)
+		}
+	case user.Rider:
+		{
+
+		}
+	}
+
+}
