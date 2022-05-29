@@ -430,7 +430,7 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 				data.GroupTotalPrice += cat.CategoryPrice * it.RouteItemAmount
 				var commo group.GroupInfoSupplierCommodity
 				copier.Copy(&commo, cat)
-				commo.RouteId = rt.RouteId
+				commo.ParentId = cat.CategoryFatherId
 				commo.RouteAmount = it.RouteItemAmount
 				data.GroupCommodity = append(data.GroupCommodity, commo)
 			}
@@ -438,7 +438,7 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 				grouprider := user_service.QueryUserById(retgroup.GroupRiderId)
 				data.GroupRiderName = grouprider.UserName
 				data.GroupRiderPhone = grouprider.UserPhone
-				riderpos, err := address_service.QueryAddressById(grouprider.UserId)
+				riderpos, err := address_service.QueryAddressById(grouprider.UserDefaultAddressId)
 				if err != nil {
 					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 					c.Abort()
@@ -525,8 +525,58 @@ func GroupInfo(c *gin.Context) {
 	}
 }
 
-func AgentGetDetail(uid int, gid int) {
+func AgentGetDetail(c *gin.Context, uid int, gid int) {
+	var result group.GroupAgentDetail
+	gp := group_service.QueryGroupById(gid)
+	copier.Copy(&result, gp)
+	result.GroupTotalPrice = group_service.QueryGroupTotalPriceById(gid)
+	result.GroupUserNumber = group_service.CountGroupUserById(gid)
+	creator := user_service.QueryUserById(gp.GroupCreatorId)
+	result.GroupCreatorName = creator.UserName
+	result.GroupCreatorPhone = creator.UserPhone
+	gpaddr, err := address_service.QueryAddressById(gp.GroupAddressId)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	copier.Copy(&result.GroupCreatorAddress, gpaddr)
+	rider := user_service.QueryUserById(gp.GroupRiderId)
+	result.GroupRiderName = rider.UserName
+	result.GroupRiderPhone = rider.UserPhone
+	rideraddr, err := address_service.QueryAddressById(rider.UserDefaultAddressId)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	copier.Copy(&result.GroupRiderPos, rideraddr)
+	result.GroupRiderPos.RouteEstimatedTime, err = route_service.QueryGroupTime(gp.GroupId)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	CategoryIDs := group_service.QueryGroupCategories(gp.GroupId)
 
+	for _, cid := range *CategoryIDs {
+		var commo group.GroupAgentCommodity
+		catinfo := category_service.QueryCategoryById(cid)
+		copier.Copy(&commo, catinfo)
+		commo.Id = catinfo.CategoryFatherId
+		grouporders := order_service.QueryOrderByGroupCategory(gp.GroupId, cid)
+		commo.TotalAmount = 0
+		for _, ord := range *grouporders {
+			var catuser group.GroupAgentCommodityUser
+			commo.TotalAmount += ord.OrderAmount
+			userinfo := user_service.QueryUserById(ord.OrderUserId)
+			copier.Copy(&catuser, &userinfo)
+			catuser.UserAmount = ord.OrderAmount
+			commo.CategoryUser = append(commo.CategoryUser, catuser)
+		}
+		result.GroupCommodities = append(result.GroupCommodities, commo)
+	}
+	c.Set(define.ESSRESPONSE, response.JSONData(&result))
 }
 
 // @Summary Agent/Rider get detail
@@ -534,7 +584,7 @@ func AgentGetDetail(uid int, gid int) {
 // @Produce json
 // @Param id path int true "edit group id"
 // @Success 200
-// @Router /group/details/{id} [put]
+// @Router /group/details/{id} [get]
 func GetDetailInfo(c *gin.Context) {
 	claim, _ := c.Get(define.ESSPOLICY)
 	policy, _ := claim.(authUtils.Policy)
@@ -543,7 +593,7 @@ func GetDetailInfo(c *gin.Context) {
 	switch policy.ConvertToUser().UserRole {
 	case user.Leader:
 		{
-			AgentGetDetail(UserId, GroupId)
+			AgentGetDetail(c, UserId, GroupId)
 		}
 	case user.Rider:
 		{

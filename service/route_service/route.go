@@ -41,3 +41,15 @@ func QueryRouteItem(rid int) (*[]route.RouteItem, error) {
 	err := db.MysqlDB.Where(&route.RouteItem{RouteId: rid}).Find(&result).Error
 	return &result, err
 }
+
+func QueryGroupTime(gid int) (int64, error) {
+	var result int64 = 0
+	routes, err := QeuryRouteByGroupId(gid)
+	if err != nil {
+		return 0, err
+	}
+	for _, rt := range *routes {
+		result += rt.RouteEstimatedTime
+	}
+	return result, nil
+}

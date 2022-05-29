@@ -45,7 +45,7 @@ type GroupInfoAddress struct {
 
 type GroupInfoCommodity struct {
 	CategoryId       int     `json:"type_id"`
-	OrderId          int     `json:"id"`
+	ParentId         int     `json:"id"`
 	CategoryName     string  `json:"name"`
 	CategoryImageUrl string  `json:"avatar"`
 	CategoryPrice    float64 `json:"price"`
@@ -118,7 +118,7 @@ type GroupEditReq struct {
 
 type GroupInfoSupplierCommodity struct {
 	CategoryId       int     `json:"type_id"`
-	RouteId          int     `json:"id"`
+	ParentId         int     `json:"id"`
 	CategoryName     string  `json:"name"`
 	CategoryImageUrl string  `json:"avatar"`
 	CategoryPrice    float64 `json:"price"`
@@ -177,4 +177,41 @@ type GroupInfoRiderData struct {
 type GroupInfoRiderResp struct {
 	Count     int                  `json:"count"`
 	GroupData []GroupInfoRiderData `json:"data"`
+}
+
+type GroupAgentCommodityUser struct {
+	UserId     int     `json:"user_id"`
+	UserName   string  `json:"user_name"`
+	UserPhone  string  `json:"user_phone"`
+	UserAmount float64 `json:"number"`
+}
+
+type GroupAgentCommodity struct {
+	CategoryId       int                       `json:"type_id"`
+	Id               int                       `json:"id"`
+	CategoryName     string                    `json:"name"`
+	CategoryImageUrl string                    `json:"avatar"`
+	CategoryPrice    float64                   `json:"price"`
+	TotalAmount      float64                   `json:"total_number"`
+	CategoryUser     []GroupAgentCommodityUser `json:"users"`
+}
+
+type GroupAgentDetail struct {
+	GroupId             int                   `json:"id"`
+	GroupName           string                `json:"name"`
+	GroupStatus         Status                `json:"type"`
+	GroupCreatorId      int                   `json:"creator_id"`
+	GroupCreatorName    string                `json:"creator_name"`
+	GroupCreatorPhone   string                `json:"creator_phone"`
+	GroupUserNumber     int                   `json:"user_number"`
+	GroupCreatorAddress GroupCreatorAddress   `json:"creator_address"`
+	GroupRemark         string                `json:"remark"`
+	GroupDescription    string                `json:"description"`
+	GroupTotalPrice     float64               `json:"total_price"`
+	GroupCreatedAt      int64                 `json:"created_time"`
+	GroupUpdatedAt      int64                 `json:"updated_time"`
+	GroupRiderPhone     string                `json:"rider_phone"`
+	GroupRiderName      string                `json:"rider_name"`
+	GroupRiderPos       GroupRiderAddress     `json:"rider_pos"`
+	GroupCommodities    []GroupAgentCommodity `json:"commodity_detail"`
 }

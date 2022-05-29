@@ -107,6 +107,31 @@ const docTemplate = `{
                 }
             }
         },
+        "/group/details/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "summary": "Agent/Rider get detail",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "edit group id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/group/edit/{id}": {
             "put": {
                 "produces": [

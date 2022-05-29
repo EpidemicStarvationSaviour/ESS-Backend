@@ -160,9 +160,11 @@ func GetGroupDetail(grp *group.Group, uid int) (*group.GroupInfoData, error) {
 	log.Printf("%+v", CategoryIDs)
 	var commo group.GroupInfoCommodity
 	for _, catid := range *CategoryIDs {
-		copier.Copy(&commo, category_service.QueryCategoryById(catid))
+		catinfo := category_service.QueryCategoryById(catid)
+		copier.Copy(&commo, catinfo)
 		// TODO
 		commo.OrderAmount = 0
+		commo.ParentId = catinfo.CategoryFatherId
 		orders := order_service.QueryOrderByGroupCategory(grp.GroupId, catid)
 		for _, ord := range *orders {
 			commo.TotalAmount += ord.OrderAmount

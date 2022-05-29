@@ -417,6 +417,22 @@ paths:
       summary: create a new group
       tags:
       - group
+  /group/details/{id}:
+    get:
+      parameters:
+      - description: edit group id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: Agent/Rider get detail
+      tags:
+      - group
   /group/edit/{id}:
     put:
       parameters:
