@@ -318,9 +318,16 @@ func EditGroup(c *gin.Context) {
 	policy, _ := claim.(authUtils.Policy)
 	var newgroup group.Group
 	newgroup.GroupId = c.GetInt(c.Param("id"))
-	log.Printf("GID= %d\n", newgroup.GroupId)
+	{
+		var req_uri group.GroupDetailReq
+		if err := c.ShouldBindUri(&req_uri); err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Abort()
+			return
+		}
+		newgroup.GroupId = req_uri.GroupId
+	}
 
-	log.Printf("input id = %d \n", newgroup.GroupId)
 	newgroup = *group_service.QueryGroupById(newgroup.GroupId)
 
 	var editinfo group.GroupEditReq
@@ -611,10 +618,6 @@ func RiderGetDetail(c *gin.Context, uid int, gid int) {
 		return
 	}
 
-	for _, rt := range *grouproutes {
-		log.Printf("rtid= %d\n", rt.RouteId)
-		log.Printf("gpid= %d\n", rt.RouteGroupId)
-	}
 	myroutes := *grouproutes
 	myroutes = myroutes[:len(myroutes)-1]
 	for _, rt := range myroutes {
@@ -678,7 +681,6 @@ func GetDetailInfo(c *gin.Context) {
 		GroupId = req_uri.GroupId
 	}
 	UserId := policy.GetId()
-	log.Printf("GID= %d\n", GroupId)
 
 	switch policy.ConvertToUser().UserRole {
 	case user.Leader:
