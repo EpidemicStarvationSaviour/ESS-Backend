@@ -178,5 +178,6 @@ func DeleteUser(c *gin.Context) {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 		c.Abort()
 	}
+	c.Set(define.ESSRESPONSE, response.JSONData("success"))
 
 }

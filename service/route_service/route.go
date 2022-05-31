@@ -13,7 +13,7 @@ func SupplierFinishedCount(uid int) (int64, error) {
 
 func QueryRouteByUser(uid int) (*[]route.Route, error) {
 	var result []route.Route
-	err := db.MysqlDB.Where(&route.Route{RouteUserId: uid}).Find(&result).Error
+	err := db.MysqlDB.Where(&route.Route{RouteUserId: uid}).Order("route_index").Find(&result).Error
 	return &result, err
 }
 
@@ -27,7 +27,7 @@ func DeleteRouteById(rid int) error {
 
 func QeuryRouteByGroupId(gid int) (*[]route.Route, error) {
 	var result []route.Route
-	err := db.MysqlDB.Where(&route.Route{RouteGroupId: gid}).Find(&result).Error
+	err := db.MysqlDB.Where(&route.Route{RouteGroupId: gid}).Order("route_index").Find(&result).Error
 	return &result, err
 }
 

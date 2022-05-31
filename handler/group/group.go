@@ -231,7 +231,7 @@ func SearchGroup(c *gin.Context) {
 // @Tags	group
 // @Produce json
 // @Param data body group.GroupJoinReq true "Join Group Info"
-// @Success 200 {object} group.GroupInfoResp
+// @Success 200
 // @Router /group/join [post]
 func JoinGroup(c *gin.Context) {
 	claim, _ := c.Get(define.ESSPOLICY)
@@ -579,6 +579,82 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 	c.Set(define.ESSRESPONSE, response.JSONData(&result))
 }
 
+func RiderGetDetail(c *gin.Context, uid int, gid int) {
+	var result group.GroupRiderDetail
+	gp := group_service.QueryGroupById(gid)
+	copier.Copy(&result, gp)
+
+	creator := user_service.QueryUserById(gp.GroupCreatorId)
+	result.GroupCreatorName = creator.UserName
+	result.GroupCreatorPhone = creator.UserPhone
+	gpaddr, err := address_service.QueryAddressById(gp.GroupAddressId)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	copier.Copy(&result.GroupCreatorAddress, gpaddr)
+	myuserinfo := user_service.QueryUserById(uid)
+	myaddr, err := address_service.QueryAddressById(myuserinfo.UserDefaultAddressId)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	copier.Copy(&result.GroupRiderPos, myaddr)
+	grouproutes, err := route_service.QeuryRouteByGroupId(gid)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+
+	for _, rt := range *grouproutes {
+		log.Printf("rtid= %d\n", rt.RouteId)
+		log.Printf("gpid= %d\n", rt.RouteGroupId)
+	}
+	myroutes := *grouproutes
+	myroutes = myroutes[:len(myroutes)-1]
+	for _, rt := range myroutes {
+		var rtdetail group.GroupRiderRoute
+		storeinfo := user_service.QueryUserById(rt.RouteUserId)
+		rtdetail.RouteUserId = rt.RouteUserId
+		rtdetail.RouteUserPhone = storeinfo.UserPhone
+		storeaddr, err := address_service.QueryAddressById(storeinfo.UserDefaultAddressId)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Abort()
+			return
+		}
+		copier.Copy(&rtdetail.RouteUserPos, storeaddr)
+		rtdetail.RouteVisited = rt.RouteDone
+		if rt.RouteDone {
+			rtdetail.RouteVisitedTime = rt.RouteFinishedAt.Unix()
+		} else {
+			rtdetail.RouteVisitedTime = rt.RouteEstimatedTime
+		}
+		items, err := route_service.QueryRouteItem(rt.RouteId)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Abort()
+			return
+		}
+		log.Printf("rid: %d\n", rt.RouteId)
+		for _, it := range *items {
+			var commo group.GroupInfoSupplierCommodity
+			commo.CategoryId = it.RouteItemCategoryId
+			cat := category_service.QueryCategoryById(it.RouteItemCategoryId)
+			commo.CategoryName = cat.CategoryName
+			commo.ParentId = cat.CategoryFatherId
+			commo.RouteAmount = it.RouteItemAmount
+			rtdetail.RouteCommodities = append(rtdetail.RouteCommodities, commo)
+		}
+		result.GroupRouteDetail = append(result.GroupRouteDetail, rtdetail)
+	}
+
+	c.Set(define.ESSRESPONSE, response.JSONData(&result))
+}
+
 // @Summary Agent/Rider get detail
 // @Tags	group
 // @Produce json
@@ -590,6 +666,7 @@ func GetDetailInfo(c *gin.Context) {
 	policy, _ := claim.(authUtils.Policy)
 	GroupId := c.GetInt(c.Param("id"))
 	UserId := policy.GetId()
+
 	switch policy.ConvertToUser().UserRole {
 	case user.Leader:
 		{
@@ -597,7 +674,7 @@ func GetDetailInfo(c *gin.Context) {
 		}
 	case user.Rider:
 		{
-
+			RiderGetDetail(c, UserId, GroupId)
 		}
 	}
 

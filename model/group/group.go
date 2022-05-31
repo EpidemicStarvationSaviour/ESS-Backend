@@ -215,3 +215,29 @@ type GroupAgentDetail struct {
 	GroupRiderPos       GroupRiderAddress     `json:"rider_pos"`
 	GroupCommodities    []GroupAgentCommodity `json:"commodity_detail"`
 }
+
+type GroupRiderRoute struct {
+	RouteUserId      int                          `json:"store_id"`
+	RouteUserPhone   string                       `json:"store_phone"`
+	RouteUserPos     GroupRiderAddress            `json:"store_pos"` // reuse of the struct
+	RouteVisitedTime int64                        `json:"visit_time"`
+	RouteVisited     bool                         `json:"visited"`
+	RouteCommodities []GroupInfoSupplierCommodity `json:"commodities"` // reuse of the struct
+}
+
+type GroupRiderDetail struct {
+	GroupId             int                 `json:"id"`
+	GroupName           string              `json:"name"`
+	GroupStatus         Status              `json:"type"`
+	GroupCreatorId      int                 `json:"creator_id"`
+	GroupCreatorName    string              `json:"creator_name"`
+	GroupCreatorPhone   string              `json:"creator_phone"`
+	GroupCreatorAddress GroupCreatorAddress `json:"creator_address"`
+	GroupRemark         string              `json:"remark"`
+	GroupDescription    string              `json:"description"`
+	GroupReward         float64             `json:"reward"`
+	GroupCreatedAt      int64               `json:"created_time"`
+	GroupUpdatedAt      int64               `json:"updated_time"`
+	GroupRiderPos       GroupRiderAddress   `json:"rider_pos"`
+	GroupRouteDetail    []GroupRiderRoute   `json:"route_detail"`
+}
