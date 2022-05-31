@@ -127,7 +127,7 @@ func DeleteUser(c *gin.Context) {
 	// group
 	createdgroup := group_service.QeuryGroupByCreatorId(DeleteUserId.UserId)
 	for _, gp := range *createdgroup {
-		rts, err := route_service.QeuryRouteByGroupId(gp.GroupId)
+		rts, err := route_service.QueryRouteByGroupId(gp.GroupId)
 		if err != nil {
 			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 			c.Abort()

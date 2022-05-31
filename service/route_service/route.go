@@ -22,12 +22,12 @@ func DeleteRouteItemById(rid int) error {
 }
 
 func DeleteRouteById(rid int) error {
-	return db.MysqlDB.Where(&route.Route{RouteId: rid}).Delete(&route.RouteItem{}).Error
+	return db.MysqlDB.Model(&route.Route{}).Where(&route.Route{RouteId: rid}).Delete(&route.RouteItem{}).Error
 }
 
-func QeuryRouteByGroupId(gid int) (*[]route.Route, error) {
+func QueryRouteByGroupId(gid int) (*[]route.Route, error) {
 	var result []route.Route
-	err := db.MysqlDB.Where(&route.Route{RouteGroupId: gid}).Order("route_index").Find(&result).Error
+	err := db.MysqlDB.Model(&route.Route{}).Where(&route.Route{RouteGroupId: gid}).Order("route_index").Find(&result).Error
 	return &result, err
 }
 
@@ -44,7 +44,7 @@ func QueryRouteItem(rid int) (*[]route.RouteItem, error) {
 
 func QueryGroupTime(gid int) (int64, error) {
 	var result int64 = 0
-	routes, err := QeuryRouteByGroupId(gid)
+	routes, err := QueryRouteByGroupId(gid)
 	if err != nil {
 		return 0, err
 	}
