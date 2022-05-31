@@ -664,7 +664,17 @@ func RiderGetDetail(c *gin.Context, uid int, gid int) {
 func GetDetailInfo(c *gin.Context) {
 	claim, _ := c.Get(define.ESSPOLICY)
 	policy, _ := claim.(authUtils.Policy)
-	GroupId := c.GetInt(c.Param("id"))
+
+	var GroupId int
+	{
+		var req_uri group.GroupDetailReq
+		if err := c.ShouldBindUri(&req_uri); err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Abort()
+			return
+		}
+		GroupId = req_uri.GroupId
+	}
 	UserId := policy.GetId()
 
 	switch policy.ConvertToUser().UserRole {
