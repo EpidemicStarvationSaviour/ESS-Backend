@@ -11,6 +11,7 @@ import (
 	"ess/service/order_service"
 	"ess/service/route_service"
 	"ess/service/user_service"
+	"ess/utils/algorithm"
 	"ess/utils/authUtils"
 	"ess/utils/logging"
 	"ess/utils/response"
@@ -148,7 +149,7 @@ func SearchGroup(c *gin.Context) {
 	var result group.GroupInfoResp
 
 	if searchinfo.SearchType == 0 {
-		groups := group_service.QeuryGroupByName(searchinfo.SearchValue)
+		groups := group_service.QueryGroupByName(searchinfo.SearchValue)
 
 		for _, retgroup := range *groups {
 			if searchinfo.GroupType == 0 || retgroup.GroupStatus == group.Status(searchinfo.GroupType) {
@@ -189,7 +190,7 @@ func SearchGroup(c *gin.Context) {
 
 	if searchinfo.SearchType == 1 {
 		CreatorId := user_service.Name2Id(searchinfo.SearchValue)
-		groups := group_service.QeuryGroupByCreatorId(CreatorId)
+		groups := group_service.QueryGroupByCreatorId(CreatorId)
 
 		for _, retgroup := range *groups {
 			if retgroup.GroupStatus == group.Status(searchinfo.GroupType) {
@@ -222,6 +223,8 @@ func SearchGroup(c *gin.Context) {
 			}
 		}
 
+		// TODO: if searchinfo.SearchType == 2
+
 		c.Set(define.ESSRESPONSE, response.JSONData(&result))
 		return
 	}
@@ -250,7 +253,7 @@ func JoinGroup(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	for _, usrid := range *groupuserIDs {
+	for _, usrid := range *groupuserIDs { // TODO: support modify
 		if usrid == userID {
 			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 			c.Abort()
@@ -289,7 +292,7 @@ func AgentOwnGroup(c *gin.Context) {
 	}
 	userID := policy.GetId()
 	var result group.GroupInfoResp
-	mygroup := group_service.QeuryGroupByCreatorId(userID)
+	mygroup := group_service.QueryGroupByCreatorId(userID)
 	for _, grp := range *mygroup {
 		if groupreq.Type == 0 || grp.GroupStatus == group.Status(groupreq.Type) {
 			result.Count++
@@ -329,6 +332,7 @@ func EditGroup(c *gin.Context) {
 	}
 
 	newgroup = *group_service.QueryGroupById(newgroup.GroupId)
+	old_status := newgroup.GroupStatus
 
 	var editinfo group.GroupEditReq
 	if err := c.ShouldBind(&editinfo); err != nil {
@@ -370,7 +374,7 @@ func EditGroup(c *gin.Context) {
 		for j := range newgroup.GroupCategories {
 			if editinfo.GroupCommodityIds[i] == newgroup.GroupCategories[j].CategoryId {
 				editinfo.GroupCommodityIds[i] = -1
-				newgroup.GroupCategories[j].CategoryId = -newgroup.GroupCategories[j].CategoryId
+				newgroup.GroupCategories[j].CategoryId = -newgroup.GroupCategories[j].CategoryId // TODO: test
 			}
 		}
 	}
@@ -394,6 +398,17 @@ func EditGroup(c *gin.Context) {
 			newgroup.GroupCategories = append(newgroup.GroupCategories, *category_service.QueryCategoryById(editinfo.GroupCommodityIds[i]))
 		}
 	}
+
+	// assume that if the status is changed, then nothing else is changed
+	if old_status == group.Created && editinfo.GroupStatus == group.Submitted {
+		if err := algorithm.Schedule(newgroup.GroupId, policy.GetId()); err != nil {
+			logging.ErrorF("schedule group %d failed: +v\n", newgroup.GroupId, err)
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_ALGORITHM))
+			c.Abort()
+			return
+		}
+	}
+
 	err = group_service.UpdateGroup(&newgroup)
 	if err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
@@ -420,7 +435,7 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 	for _, rt := range *routes {
 		retgroup := group_service.QueryGroupById(rt.RouteGroupId)
 
-		if groupcondition.Type == 0 || ((retgroup.GroupStatus == 1 || retgroup.GroupStatus == 2) && groupcondition.Type == 1) || (retgroup.GroupStatus == 3 && groupcondition.Type == 2) || (retgroup.GroupStatus == 4 && groupcondition.Type == 3) {
+		if groupcondition.Type == 0 || ((retgroup.GroupStatus == 1 || retgroup.GroupStatus == 2) && groupcondition.Type == 1) || (retgroup.GroupStatus == 3 && groupcondition.Type == 2) || (retgroup.GroupStatus == 4 && groupcondition.Type == 3) { // FIXME
 			result.Count++
 			var data group.GroupInfoSupplierData
 			copier.Copy(&data, &retgroup)
@@ -690,6 +705,12 @@ func GetDetailInfo(c *gin.Context) {
 	case user.Rider:
 		{
 			RiderGetDetail(c, UserId, GroupId)
+		}
+	default:
+		{
+			c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("没有权限"))
+			c.Abort()
+			return
 		}
 	}
 

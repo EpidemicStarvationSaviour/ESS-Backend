@@ -20,7 +20,8 @@ const (
 	ERROR_NOT_VALID_USER_PARAM Code = 10006 // 用户创建参数不合法
 	ERROR_UPDATE_FAIL          Code = 10100 // 更新模型错误
 
-	ERROR_DATABASE_QUERY Code = 20000 //  数据库内部错误
+	ERROR_DATABASE_QUERY Code = 20000 // 数据库内部错误
+	ERROR_ALGORITHM      Code = 20001 // 算法侧错误
 
 	ERROR_DEFAULT  Code = 30000 // 未知错误
 	ERROR_IP_BLOCK Code = 40000 // ip 被暂时封禁

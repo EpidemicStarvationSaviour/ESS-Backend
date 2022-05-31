@@ -59,3 +59,16 @@ func PurchaserOnly() gin.HandlerFunc {
 		}
 	}
 }
+
+// check the policy and return ERROR_NOT_LEADER if forbidden
+// CAUTION: use it after jwt middleware
+func LeaderOnly() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		claim, _ := c.Get(define.ESSPOLICY)
+		if policy, ok := claim.(authUtils.Policy); !ok || !policy.LeaderOnly() {
+			c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("不是团长"))
+			c.Abort()
+			return
+		}
+	}
+}

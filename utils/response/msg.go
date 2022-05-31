@@ -14,6 +14,7 @@ var MsgFlags = map[Code]string{
 	ERROR_USER_NOT_FOUND:         "账号目前未在数据库中找到",
 	ERROR_UPDATE_FAIL:            "更新模型错误，请重试",
 	ERROR_DATABASE_QUERY:         "数据库内部查询错误，请重试",
+	ERROR_ALGORITHM:              "骑手调度错误，请重试",
 	ERROR_IP_BLOCK:               "登录失败次数过多, 暂时封禁 IP, 请 5min 后重试",
 	ERROR_ADMIN_INVALID_PASSWORD: "管理员密码错误",
 	ERROR_NOT_VALID_USER_PARAM:   "用户创建参数不合法",

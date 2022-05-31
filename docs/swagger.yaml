@@ -468,9 +468,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/group.GroupInfoResp'
+          description: ""
       summary: Join a group (create new order)
       tags:
       - group

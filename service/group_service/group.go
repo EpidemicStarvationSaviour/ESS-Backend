@@ -14,14 +14,14 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-func QeuryGroupByName(name string) *[]group.Group {
+func QueryGroupByName(name string) *[]group.Group {
 	var groups []group.Group
 	resinfo := db.MysqlDB.Where("group_name Like ?", "%"+name+"%").Find(&groups)
 	logging.InfoF("Find %d groups with name %s\n", resinfo.RowsAffected, name)
 	return &groups
 }
 
-func QeuryGroupByCreatorId(cid int) *[]group.Group {
+func QueryGroupByCreatorId(cid int) *[]group.Group {
 	var groups []group.Group
 	resinfo := db.MysqlDB.Where(&group.Group{GroupCreatorId: cid}).Find(&groups)
 	logging.InfoF("Find %d groups with creatorID %d\n", resinfo.RowsAffected, cid)

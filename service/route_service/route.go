@@ -42,7 +42,7 @@ func QueryRouteItem(rid int) (*[]route.RouteItem, error) {
 	return &result, err
 }
 
-func QueryGroupTime(gid int) (int64, error) {
+func QueryGroupTime(gid int) (int64, error) { // FIXME
 	var result int64 = 0
 	routes, err := QueryRouteByGroupId(gid)
 	if err != nil {

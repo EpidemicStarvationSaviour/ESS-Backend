@@ -125,7 +125,7 @@ func DeleteUser(c *gin.Context) {
 	}
 	// log.Print("3\n")
 	// group
-	createdgroup := group_service.QeuryGroupByCreatorId(DeleteUserId.UserId)
+	createdgroup := group_service.QueryGroupByCreatorId(DeleteUserId.UserId)
 	for _, gp := range *createdgroup {
 		rts, err := route_service.QueryRouteByGroupId(gp.GroupId)
 		if err != nil {
