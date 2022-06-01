@@ -3,6 +3,7 @@ package route_service
 import (
 	"ess/model/route"
 	"ess/utils/db"
+	"time"
 )
 
 func SupplierFinishedCount(uid int) (int64, error) {
@@ -42,14 +43,29 @@ func QueryRouteItem(rid int) (*[]route.RouteItem, error) {
 	return &result, err
 }
 
-func QueryGroupTime(gid int) (int64, error) { // FIXME
+func QueryGroupTime(gid int) (int64, error) { // TODO: test
 	var result int64 = 0
 	routes, err := QueryRouteByGroupId(gid)
 	if err != nil {
 		return 0, err
 	}
-	for _, rt := range *routes {
-		result += rt.RouteEstimatedTime
+	var start_at, end_at time.Time
+	if !(*routes)[0].RouteDone {
+		start_at = time.Now()
+		end_at = start_at
+	} else {
+		start_at = (*routes)[0].RouteFinishedAt
 	}
+
+	for _, rt := range *routes {
+		if rt.RouteDone {
+			end_at = rt.RouteFinishedAt
+		} else {
+			result += rt.RouteEstimatedTime
+		}
+	}
+
+	result += end_at.Unix() - start_at.Unix()
+
 	return result, nil
 }
