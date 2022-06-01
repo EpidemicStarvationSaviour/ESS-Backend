@@ -268,7 +268,6 @@ func JoinGroup(c *gin.Context) {
 	// joingroup = group_service.QueryGroupById(joininfo.GroupId)
 	// groupuserIDs, err := order_service.QueryUidByGroup(joininfo.GroupId)
 
-	// TODO: support modify
 	groupords, err := order_service.QueryOrderByGroup(joininfo.GroupId)
 	if err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
@@ -286,15 +285,20 @@ func JoinGroup(c *gin.Context) {
 						c.Abort()
 						return
 					}
+					cat.OrderCategoryId = -1
 				}
 			}
 		}
 	}
 	for _, joindata := range joininfo.OrderData {
+		if joindata.OrderCategoryId == -1 {
+			continue
+		}
 		var neworder order.Order
 		copier.Copy(&neworder, &joindata)
 		neworder.OrderGroupId = joininfo.GroupId
 		neworder.OrderUserId = userID
+		neworder.OrderAmount = joindata.OrderAmount
 		err := order_service.CreateNewOrder(&neworder)
 		if err != nil {
 			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
