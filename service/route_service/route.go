@@ -18,6 +18,12 @@ func QueryRouteByUser(uid int) (*[]route.Route, error) {
 	return &result, err
 }
 
+func QueryRouteByUserAndGroup(uid, gid int) (route.Route, error) {
+	var result route.Route
+	err := db.MysqlDB.Where(&route.Route{RouteUserId: uid, RouteGroupId: gid}).First(&result).Error
+	return result, err
+}
+
 func DeleteRouteItemById(rid int) error {
 	return db.MysqlDB.Where(&route.RouteItem{RouteId: rid}).Delete(&route.RouteItem{}).Error
 }

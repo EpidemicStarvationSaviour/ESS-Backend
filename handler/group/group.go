@@ -15,6 +15,7 @@ import (
 	"ess/utils/authUtils"
 	"ess/utils/logging"
 	"ess/utils/response"
+	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -435,7 +436,13 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 	for _, rt := range *routes {
 		retgroup := group_service.QueryGroupById(rt.RouteGroupId)
 
-		if groupcondition.Type == 0 || ((retgroup.GroupStatus == 1 || retgroup.GroupStatus == 2) && groupcondition.Type == 1) || (retgroup.GroupStatus == 3 && groupcondition.Type == 2) || (retgroup.GroupStatus == 4 && groupcondition.Type == 3) { // FIXME
+		status, err := GetGroupStatusForSupplier(retgroup, userID)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+			c.Abort()
+			return
+		}
+		if groupcondition.Type == 0 || groupcondition.Type == status { // TODO: test
 			result.Count++
 			var data group.GroupInfoSupplierData
 			copier.Copy(&data, &retgroup)
@@ -714,4 +721,28 @@ func GetDetailInfo(c *gin.Context) {
 		}
 	}
 
+}
+
+func GetGroupStatusForSupplier(grp *group.Group, uid int) (int, error) {
+	switch grp.GroupStatus {
+	case group.Created:
+		fallthrough
+	case group.Submitted:
+		return 1, nil
+	case group.Delivering:
+		{
+			rt, err := route_service.QueryRouteByUserAndGroup(uid, grp.GroupId)
+			if err != nil {
+				return 0, err
+			}
+			if !rt.RouteDone {
+				return 2, nil
+			} else {
+				return 3, nil
+			}
+		}
+	case group.Finished:
+		return 3, nil
+	}
+	return 0, fmt.Errorf("GetGroupStatusForSupplier error")
 }
