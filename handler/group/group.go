@@ -149,6 +149,7 @@ func SearchGroup(c *gin.Context) {
 	userID := policy.GetId()
 	var result group.GroupInfoResp
 
+	// group name
 	if searchinfo.SearchType == 0 {
 		groups := group_service.QueryGroupByName(searchinfo.SearchValue)
 
@@ -185,10 +186,9 @@ func SearchGroup(c *gin.Context) {
 
 		log.Printf("%+v", result)
 
-		c.Set(define.ESSRESPONSE, response.JSONData(&result))
-		return
 	}
 
+	// creator name
 	if searchinfo.SearchType == 1 {
 		CreatorId := user_service.Name2Id(searchinfo.SearchValue)
 		groups := group_service.QueryGroupByCreatorId(CreatorId)
@@ -224,11 +224,29 @@ func SearchGroup(c *gin.Context) {
 			}
 		}
 
-		// TODO: if searchinfo.SearchType == 2
-
-		c.Set(define.ESSRESPONSE, response.JSONData(&result))
-		return
 	}
+
+	// group description
+	if searchinfo.SearchType == 2 {
+
+		groups := group_service.QueryGroupByDescription(searchinfo.SearchValue)
+
+		for _, retgroup := range *groups {
+			if retgroup.GroupStatus == group.Status(searchinfo.GroupType) {
+				data, err := group_service.GetGroupDetail(&retgroup, userID)
+				if err != nil {
+					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+					c.Abort()
+					return
+				}
+				result.Count++
+				result.Data = append(result.Data, *data)
+			}
+		}
+	}
+
+	c.Set(define.ESSRESPONSE, response.JSONData(&result))
+
 }
 
 // @Summary Join a group (create new order)
@@ -248,17 +266,28 @@ func JoinGroup(c *gin.Context) {
 	}
 	userID := policy.GetId()
 	// joingroup = group_service.QueryGroupById(joininfo.GroupId)
-	groupuserIDs, err := order_service.QueryUidByGroup(joininfo.GroupId)
+	// groupuserIDs, err := order_service.QueryUidByGroup(joininfo.GroupId)
+
+	// TODO: support modify
+	groupords, err := order_service.QueryOrderByGroup(joininfo.GroupId)
 	if err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 		c.Abort()
 		return
 	}
-	for _, usrid := range *groupuserIDs { // TODO: support modify
-		if usrid == userID {
-			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
-			c.Abort()
-			return
+	for _, ord := range *groupords {
+		if userID == ord.OrderUserId {
+			for _, cat := range joininfo.OrderData {
+				if cat.OrderCategoryId == ord.OrderCategoryId {
+					ord.OrderAmount = cat.OrderAmount
+					err := order_service.UpdateOrder(ord)
+					if err != nil {
+						c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+						c.Abort()
+						return
+					}
+				}
+			}
 		}
 	}
 	for _, joindata := range joininfo.OrderData {

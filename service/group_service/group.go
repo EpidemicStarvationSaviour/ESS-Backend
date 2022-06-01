@@ -16,8 +16,15 @@ import (
 
 func QueryGroupByName(name string) *[]group.Group {
 	var groups []group.Group
-	resinfo := db.MysqlDB.Where("group_name Like ?", "%"+name+"%").Find(&groups)
+	resinfo := db.MysqlDB.Where("group_name LIKE ?", "%"+name+"%").Find(&groups)
 	logging.InfoF("Find %d groups with name %s\n", resinfo.RowsAffected, name)
+	return &groups
+}
+
+func QueryGroupByDescription(des string) *[]group.Group {
+	var groups []group.Group
+	resinfo := db.MysqlDB.Where("group_description LIKE ?", "%"+des+"%").Find(&groups)
+	logging.InfoF("Find %d groups with description %s\n", resinfo.RowsAffected, des)
 	return &groups
 }
 
