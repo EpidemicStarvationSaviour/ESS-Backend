@@ -71,6 +71,14 @@ func QueryAddressesByUserId(uid int) ([]address.Address, error) {
 	return addresses, err
 }
 
+func QueryDefaultAddressByUserId(uid int) (address.Address, error) {
+	var addresses address.Address
+	var usr user.User
+	db.MysqlDB.Where(&user.User{UserId: uid}).First(&usr)
+	err := db.MysqlDB.Where(&address.Address{AddressId: usr.UserDefaultAddressId}).First(&addresses).Error
+	return addresses, err
+}
+
 func CheckAddressByUserId(aid int, uid int) (bool, error) {
 	var count int64
 	err := db.MysqlDB.Model(&address.Address{}).Where(&address.Address{AddressId: aid, AddressUserId: uid}).Count(&count).Error

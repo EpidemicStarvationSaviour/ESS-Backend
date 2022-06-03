@@ -1,6 +1,7 @@
 package route_service
 
 import (
+	"ess/model/category"
 	"ess/model/route"
 	"ess/utils/db"
 	"time"
@@ -42,7 +43,31 @@ func DeleteRouteByGroupId(gid int) error {
 	return db.MysqlDB.Where(&route.Route{RouteGroupId: gid}).Delete(&route.Route{}).Error
 
 }
-
+func GetRouteItemTotalPrice(gid int) (float64, error) {
+	var result []route.Route
+	var pri float64
+	pri = 0
+	err := db.MysqlDB.Where(&route.Route{RouteGroupId: gid}).Order("route_id").Find(&result).Error
+	if err != nil {
+		return 0, err
+	}
+	for _, res := range result {
+		var resu []route.RouteItem
+		err := db.MysqlDB.Where(&route.RouteItem{RouteId: res.RouteId}).Find(&resu).Error
+		if err != nil {
+			return 0, err
+		}
+		for _, resul := range resu {
+			var cat category.Category
+			err := db.MysqlDB.Where(&category.Category{CategoryId: resul.RouteItemCategoryId}).First(&cat).Error
+			if err != nil {
+				return 0, err
+			}
+			pri = pri + cat.CategoryPrice*resul.RouteItemAmount
+		}
+	}
+	return pri, nil
+}
 func QueryRouteItem(rid int) (*[]route.RouteItem, error) {
 	var result []route.RouteItem
 	err := db.MysqlDB.Where(&route.RouteItem{RouteId: rid}).Find(&result).Error
