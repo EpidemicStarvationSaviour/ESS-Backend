@@ -29,6 +29,7 @@ func RiderStartGetOrder(c *gin.Context) {
 	}
 	rider_service.GetRiderAvailable(RiderId)
 	rider_service.RefreshRiderPosition(RiderId, RSP.AddressLat, RSP.AddressLng)
+	c.Set(define.ESSRESPONSE, response.JSONData("success"))
 }
 
 // @Summary Rider Stop Get Order
@@ -41,6 +42,7 @@ func RiderStopGetOrder(c *gin.Context) {
 	policy, _ := claim.(authUtils.Policy)
 	RiderId := policy.GetId()
 	rider_service.GetRiderNotavailable(RiderId)
+	c.Set(define.ESSRESPONSE, response.JSONData("success"))
 }
 
 // @Summary Rider Upload Address
@@ -60,17 +62,16 @@ func RiderUploadAddressPort(c *gin.Context) {
 		return
 	}
 	rider_service.RefreshRiderPosition(RiderId, RSP.AddressLat, RSP.AddressLng)
+	c.Set(define.ESSRESPONSE, response.JSONData("success"))
 }
 
 // @Summary Rider Check Whether there is a new order
 // @Tags    rider
 // @Produce json
-// @Success 200 {string} string "'success'"
+// @Success 200 {object} rider.RiderQueryNewOrdersResp
 // @Router  /rider/query [get]
 func RiderQueryNewOrder(c *gin.Context) {
-
-	var rider *rider.RiderQueryNewOrdersResp
-	rider = rider_service.QueryAvailableOrder()
+	rider := rider_service.QueryAvailableOrder()
 	c.Set(define.ESSRESPONSE, response.JSONData(&rider))
 }
 

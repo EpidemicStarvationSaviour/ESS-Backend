@@ -9,7 +9,7 @@ type Category struct {
 	CategoryImageUrl  string    `gorm:"size:127"`
 	CategoryLevel     uint      `gorm:"not null"` // 0: root, 1: sub
 	CategoryFather    *Category `gorm:"foreignKey:CategoryFatherId"`
-	CategoryFatherId  int       `gorm:"not null"`
+	CategoryFatherId  int       `gorm:""`
 	CategoryCreatedAt int64     `gorm:"autoCreateTime"`
 	CategoryUpdatedAt int64     `gorm:"autoUpdateTime"`
 	CategoryDeleted   gorm.DeletedAt
@@ -64,12 +64,12 @@ type CategoryCertainInfoResp struct {
 }
 
 type CategoryDetailsInfo struct {
-	StoreId            int               `json:"store_id"`
-	CategoryLat        float64           `json:"lat"`
-	CategoryLng        float64           `json:"lng"`
-	CategoryAddress    []CategoryAddress `json:"address"`
-	CategoryStorephone string            `json:"phone"`
-	Categorynumber     float64           `json:"number"`
+	StoreId            int     `json:"store_id"`
+	CategoryLat        float64 `json:"lat"`
+	CategoryLng        float64 `json:"lng"`
+	CategoryAddress    string  `json:"address"`
+	CategoryStorephone string  `json:"phone"`
+	Categorynumber     float64 `json:"number"`
 }
 
 type CategoryAddress struct {
@@ -79,9 +79,6 @@ type CategoryAddress struct {
 	AddressDetail   string `json:"detail" form:"detail" binding:"required" example:"浙江大学紫金港校区"`
 }
 
-type CategoryMyAllResp struct {
-	CategoryList []CategoryMyInfoResp `json:"data"`
-}
 type CategoryMyInfoResp struct {
 	CategoryLevel  int                  `json:"type_id"`
 	CategoryName   string               `json:"type_name"`

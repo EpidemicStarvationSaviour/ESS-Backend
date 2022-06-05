@@ -49,10 +49,10 @@ func InitRouter() *gin.Engine {
 
 	categoryMod := api.Group("/commodity")
 	categoryMod.GET("/list", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), category.GetCategoryList)
-	categoryMod.POST("/add", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), category.CreateCate)
-	categoryMod.DELETE("/delete", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), category.DeleteCate)
+	categoryMod.POST("/add", middleware.AuthenticationMiddleware(), middleware.SysAdminOnly(), category.CreateCate)
+	categoryMod.DELETE("/delete", middleware.AuthenticationMiddleware(), middleware.SysAdminOnly(), category.DeleteCate)
 	categoryMod.GET("/details/:id", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), category.GetCateDetail)
-	categoryMod.GET("/my", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), category.GetMyCategoryDetails)
+	categoryMod.GET("/my", middleware.AuthenticationMiddleware(), middleware.SupplierOnly(), category.GetMyCategoryDetails)
 	categoryMod.POST("/restock", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), category.ModifyCategoryNumber)
 
 	tokenMod := api.Group("/token")
@@ -69,17 +69,17 @@ func InitRouter() *gin.Engine {
 	groupMod.PUT("/edit/:id", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.EditGroup)
 	groupMod.GET("/details/:id", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), group.GetDetailInfo)
 
-	riderMod := api.Group("/rider")
-	riderMod.POST("/start", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), rider.RiderStartGetOrder)
-	riderMod.POST("/stop", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), rider.RiderStopGetOrder)
-	riderMod.POST("/pos", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), rider.RiderUploadAddressPort)
-	riderMod.GET("/query", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), rider.RiderQueryNewOrder)
-	riderMod.POST("/feedback", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), rider.RiderFeedbackNeworder)
-	riderMod.POST("/groupfd", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), rider.OrderFeedback)
+	riderMod := api.Group("/rider", middleware.RiderOnly())
+	riderMod.POST("/start", middleware.AuthenticationMiddleware(), rider.RiderStartGetOrder)
+	riderMod.POST("/stop", middleware.AuthenticationMiddleware(), rider.RiderStopGetOrder)
+	riderMod.POST("/pos", middleware.AuthenticationMiddleware(), rider.RiderUploadAddressPort)
+	riderMod.GET("/query", middleware.AuthenticationMiddleware(), rider.RiderQueryNewOrder)
+	riderMod.POST("/feedback", middleware.AuthenticationMiddleware(), rider.RiderFeedbackNeworder)
+	riderMod.POST("/groupfd", middleware.AuthenticationMiddleware(), rider.OrderFeedback)
 
 	adminMod := api.Group("/admin")
-	adminMod.GET("/users", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), admin.GetAllUsers)
-	adminMod.DELETE("/users", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), admin.DeleteUser)
+	adminMod.GET("/users", middleware.AuthenticationMiddleware(), middleware.SysAdminOnly(), admin.GetAllUsers)
+	adminMod.DELETE("/users", middleware.AuthenticationMiddleware(), middleware.SysAdminOnly(), admin.DeleteUser)
 
 	return r
 }

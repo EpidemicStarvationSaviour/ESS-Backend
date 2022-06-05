@@ -72,3 +72,29 @@ func LeaderOnly() gin.HandlerFunc {
 		}
 	}
 }
+
+// check the policy and return ERROR_NOT_SUPPLIER if forbidden
+// CAUTION: use it after jwt middleware
+func SupplierOnly() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		claim, _ := c.Get(define.ESSPOLICY)
+		if policy, ok := claim.(authUtils.Policy); !ok || !policy.SupplierOnly() {
+			c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("不是卖家"))
+			c.Abort()
+			return
+		}
+	}
+}
+
+// check the policy and return ERROR_NOT_SUPPLIER if forbidden
+// CAUTION: use it after jwt middleware
+func RiderOnly() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		claim, _ := c.Get(define.ESSPOLICY)
+		if policy, ok := claim.(authUtils.Policy); !ok || !policy.RiderOnly() {
+			c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("不是卖家"))
+			c.Abort()
+			return
+		}
+	}
+}

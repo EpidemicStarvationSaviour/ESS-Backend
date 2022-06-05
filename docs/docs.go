@@ -77,6 +77,162 @@ const docTemplate = `{
                 }
             }
         },
+        "/commodity/add": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "commodity"
+                ],
+                "summary": "add category",
+                "parameters": [
+                    {
+                        "description": "New Category Info",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/category.CategoryCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/category.CategoryCreateResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/commodity/delete": {
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "commodity"
+                ],
+                "summary": "delete category",
+                "parameters": [
+                    {
+                        "description": "Deleted Category id",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/category.CategoryDeleted"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "'success'",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/commodity/details/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "commodity"
+                ],
+                "summary": "get certain category details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "edit category id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/category.CategoryCertainInfoResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/commodity/list": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "commodity"
+                ],
+                "summary": "get category list and total number",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/category.CategoryInfoResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/commodity/my": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "commodity"
+                ],
+                "summary": "get  my category info",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/category.CategoryMyInfoResp"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/commodity/restock": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "commodity"
+                ],
+                "summary": "modify  my category info",
+                "parameters": [
+                    {
+                        "description": "Modify Category id",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/category.CategoryModifyRep"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/group/create": {
             "post": {
                 "produces": [
@@ -324,6 +480,164 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "'pong'",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/rider/feedback": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rider"
+                ],
+                "summary": "Rider's Feedback To New Order",
+                "parameters": [
+                    {
+                        "description": "rider's feedback",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rider.RiderFeedbackToNewOrder"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "'success'",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/rider/groupfd": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rider"
+                ],
+                "summary": "feedback to new order",
+                "parameters": [
+                    {
+                        "description": "Your feedback",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rider.FeedbackToOrder"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "'success'",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/rider/pos": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rider"
+                ],
+                "summary": "Rider Upload Address",
+                "parameters": [
+                    {
+                        "description": "rider's position",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rider.RiderUploadAddress"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "'success'",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/rider/query": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rider"
+                ],
+                "summary": "Rider Check Whether there is a new order",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/rider.RiderQueryNewOrdersResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/rider/start": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rider"
+                ],
+                "summary": "Rider Start Get Order",
+                "parameters": [
+                    {
+                        "description": "rider's position",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rider.RiderStart"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "'success'",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/rider/stop": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "rider"
+                ],
+                "summary": "Rider Stop Get Order",
+                "responses": {
+                    "200": {
+                        "description": "'success'",
                         "schema": {
                             "type": "string"
                         }
@@ -705,6 +1019,188 @@ const docTemplate = `{
                 }
             }
         },
+        "category.CategoryCertainInfoResp": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/category.CategoryDetailsInfo"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "type_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "category.CategoryChildren": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "category.CategoryCreateReq": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "type_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "category.CategoryCreateResp": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "category.CategoryDeleted": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "category.CategoryDetailsInfo": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "lat": {
+                    "type": "number"
+                },
+                "lng": {
+                    "type": "number"
+                },
+                "number": {
+                    "type": "number"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "store_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "category.CategoryInfoResp": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/category.CategoryChildren"
+                    }
+                },
+                "type_avatar": {
+                    "type": "string"
+                },
+                "type_id": {
+                    "type": "integer"
+                },
+                "type_name": {
+                    "type": "string"
+                },
+                "type_number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "category.CategoryModifyRep": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "number": {
+                    "type": "number"
+                }
+            }
+        },
+        "category.CategoryMyChildren": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "category.CategoryMyInfoResp": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/category.CategoryMyChildren"
+                    }
+                },
+                "type_avatar": {
+                    "type": "string"
+                },
+                "type_id": {
+                    "type": "integer"
+                },
+                "type_name": {
+                    "type": "string"
+                },
+                "type_number": {
+                    "type": "integer"
+                }
+            }
+        },
         "group.GroupCreateReq": {
             "type": "object",
             "properties": {
@@ -909,6 +1405,109 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                }
+            }
+        },
+        "rider.CreatorAddress": {
+            "type": "object",
+            "properties": {
+                "addressArea": {
+                    "type": "string"
+                },
+                "addressCity": {
+                    "type": "string"
+                },
+                "addressDetail": {
+                    "type": "string"
+                },
+                "addressId": {
+                    "type": "integer"
+                },
+                "addressLat": {
+                    "type": "number"
+                },
+                "addressLng": {
+                    "type": "number"
+                },
+                "addressProvince": {
+                    "type": "string"
+                }
+            }
+        },
+        "rider.FeedbackToOrder": {
+            "type": "object",
+            "properties": {
+                "group_id": {
+                    "type": "integer"
+                },
+                "lat": {
+                    "type": "number"
+                },
+                "lng": {
+                    "type": "number"
+                },
+                "store_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "rider.RiderFeedbackToNewOrder": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "rider.RiderQueryNewOrdersResp": {
+            "type": "object",
+            "properties": {
+                "creator_address": {
+                    "$ref": "#/definitions/rider.CreatorAddress"
+                },
+                "creator_name": {
+                    "type": "string"
+                },
+                "creator_phone": {
+                    "type": "string"
+                },
+                "expected_time": {
+                    "description": "OrderDistance     float64        ` + "`" + `json:\"distance\"` + "`" + `",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "reward": {
+                    "type": "number"
+                }
+            }
+        },
+        "rider.RiderStart": {
+            "type": "object",
+            "properties": {
+                "lat": {
+                    "type": "number"
+                },
+                "lng": {
+                    "type": "number"
+                }
+            }
+        },
+        "rider.RiderUploadAddress": {
+            "type": "object",
+            "properties": {
+                "lat": {
+                    "type": "number"
+                },
+                "lng": {
+                    "type": "number"
                 }
             }
         },

@@ -6,7 +6,6 @@ import (
 	"ess/model/category"
 	"ess/model/item"
 
-	"ess/model/user"
 	"ess/service/address_service"
 	"ess/service/category_service"
 	"ess/service/user_service"
@@ -82,21 +81,18 @@ func CreateCate(c *gin.Context) {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_NOT_VALID_USER_PARAM))
 		c.Abort()
 	}
-	//if policy.SysAdminOnly() {//系统管理员才能用
+
 	var cat category.Category
 	cat.CategoryImageUrl = cate.CategoryAvatar
 	cat.CategoryLevel = 1
 	copier.Copy(&cat, &cate)
 	if err := category_service.CreateNewCategory(&cat); err != nil {
-
 		c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg(err.Error()))
 		c.Abort()
 	}
 
 	resp := category.CategoryCreateResp{CategoryId: cat.CategoryId}
 	c.Set(define.ESSRESPONSE, response.JSONData(resp))
-	//}
-
 }
 
 // @Summary delete category
@@ -106,7 +102,6 @@ func CreateCate(c *gin.Context) {
 // @Success 200 {string} string "'success'"
 // @Router  /commodity/delete [delete]
 func DeleteCate(c *gin.Context) {
-
 	var cid category.CategoryDeleted
 	if err := c.ShouldBind(&cid); err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
@@ -117,10 +112,10 @@ func DeleteCate(c *gin.Context) {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 		c.Abort()
 	}
-	if err := category_service.DeleteItemByCiD(cid.CategoryId); err != nil {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
-		c.Abort()
-	}
+	// if err := category_service.DeleteItemByCiD(cid.CategoryId); err != nil {
+	// 	c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+	// 	c.Abort()
+	// }
 	c.Set(define.ESSRESPONSE, response.JSONData("success"))
 }
 
@@ -174,11 +169,16 @@ func GetCateDetail(c *gin.Context) {
 		totalnumber = totalnumber + catd.Categorynumber
 		var addr address.Address
 		addr, err = address_service.QueryDefaultAddressByUserId(catd.StoreId)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+			c.Abort()
+			return
+		}
 		copier.Copy(&catd.CategoryAddress, &addr)
-		var usr user.User
+		catd.CategoryAddress = addr.AddressDetail
 		catd.CategoryLat = addr.AddressLat
 		catd.CategoryLng = addr.AddressLat
-		usr = user_service.QueryUserById(catd.StoreId)
+		usr := user_service.QueryUserById(catd.StoreId)
 		catd.CategoryStorephone = usr.UserPhone
 
 		data.CategoryDetails = append(data.CategoryDetails, catd)
@@ -194,7 +194,7 @@ func GetCateDetail(c *gin.Context) {
 // @Summary get  my category info
 // @Tags    commodity
 // @Produce json
-// @Success 200 {object} category.CategoryMyInfoResp
+// @Success 200 {object} []category.CategoryMyInfoResp
 // @Router  /commodity/my [get]
 func GetMyCategoryDetails(c *gin.Context) {
 	claim, _ := c.Get(define.ESSPOLICY)
@@ -211,7 +211,7 @@ func GetMyCategoryDetails(c *gin.Context) {
 		return
 	}
 
-	var result category.CategoryMyAllResp
+	var result []category.CategoryMyInfoResp
 
 	for _, cat := range *cate {
 		var data category.CategoryMyInfoResp
@@ -220,6 +220,11 @@ func GetMyCategoryDetails(c *gin.Context) {
 			copier.Copy(&data, &cat)
 			var catechild []category.Category
 			catechild, err = category_service.QueryCategoryByTypeId(cat.CategoryId)
+			if err != nil {
+				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+				c.Abort()
+				return
+			}
 			data.CategoryLevel = cat.CategoryId
 			for _, categchild := range catechild {
 				var catchild category.CategoryMyChildren
@@ -234,7 +239,7 @@ func GetMyCategoryDetails(c *gin.Context) {
 				}
 			}
 			if data.CategoryNumber > 0 {
-				result.CategoryList = append(result.CategoryList, data)
+				result = append(result, data)
 			}
 		}
 	}

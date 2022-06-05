@@ -14,6 +14,7 @@ type Policy interface {
 	PurchaserOnly() bool
 	SupplierOnly() bool
 	LeaderOnly() bool
+	RiderOnly() bool
 	CheckExpired() bool
 	SysAdminOnly() bool
 	GetId() int
@@ -44,6 +45,10 @@ func (p *Payload) SupplierOnly() bool {
 
 func (p *Payload) LeaderOnly() bool {
 	return p.Role == user.Leader
+}
+
+func (p *Payload) RiderOnly() bool {
+	return p.Role == user.Rider
 }
 
 func (p *Payload) AdminOnly() bool {
