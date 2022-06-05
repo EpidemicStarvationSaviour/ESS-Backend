@@ -45,14 +45,18 @@ func RefreshRiderPosition(RiderId int, lat float64, lng float64) {
 
 var OrderId int
 
-func QueryAvailableOrder() *rider.RiderQueryNewOrdersResp {
+func QueryAvailableOrder() (error, *rider.RiderQueryNewOrdersResp) {
 	var availableorder rider.RiderQueryNewOrdersResp
 	var grou group.Group
 
 	if err := db.MysqlDB.Where(&group.Group{GroupStatus: 2, GroupSeenByRider: false}).First(&grou).Error; err != nil { //数据库的返回值
-		return nil
+		return err, nil
 	}
-	var err error
+	grou.GroupSeenByRider = true
+	err := db.MysqlDB.Model(grou).Updates(grou).Error
+	if err != nil {
+		return err, nil
+	}
 	var usr user.User
 	var addr *address.Address
 	OrderId = grou.GroupId
@@ -65,14 +69,17 @@ func QueryAvailableOrder() *rider.RiderQueryNewOrdersResp {
 	addr, _ = address_service.QueryAddressById(usr.UserDefaultAddressId)
 	copier.Copy(&availableorder.CreatorAddress, &addr)
 	availableorder.OrderReward, err = route_service.GetRouteItemTotalPrice(grou.GroupId)
+	if err != nil {
+		return err, nil
+	}
 	availableorder.OrderRemark = grou.GroupRemark
 	//availableorder.OrderDistance = 0
 	availableorder.OrderExpectedTime, err = route_service.QueryGroupTime(grou.GroupId)
 	if err != nil {
-		return nil
+		return err, nil
 	}
 
-	return &availableorder
+	return nil, &availableorder
 }
 
 func RiderFeedbackToOrder(rid int, yesorno int) {

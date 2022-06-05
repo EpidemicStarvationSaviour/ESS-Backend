@@ -71,7 +71,12 @@ func RiderUploadAddressPort(c *gin.Context) {
 // @Success 200 {object} rider.RiderQueryNewOrdersResp
 // @Router  /rider/query [get]
 func RiderQueryNewOrder(c *gin.Context) {
-	rider := rider_service.QueryAvailableOrder()
+	err, rider := rider_service.QueryAvailableOrder()
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+		c.Abort()
+		return
+	}
 	c.Set(define.ESSRESPONSE, response.JSONData(&rider))
 }
 
@@ -82,16 +87,17 @@ func RiderQueryNewOrder(c *gin.Context) {
 // @Success 200 {string} string "'success'"
 // @Router  /rider/feedback [post]
 func RiderFeedbackNeworder(c *gin.Context) {
-	claim, _ := c.Get(define.ESSPOLICY)
-	policy, _ := claim.(authUtils.Policy)
-	RiderId := policy.GetId()
+	// claim, _ := c.Get(define.ESSPOLICY)
+	// policy, _ := claim.(authUtils.Policy)
+	// RiderId := policy.GetId()
 	var RSP rider.RiderFeedbackToNewOrder
 	if err := c.ShouldBind(&RSP); err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 		c.Abort()
 		return
 	}
-	rider_service.RiderFeedbackToOrder(RiderId, RSP.YesOrNo)
+	// rider_service.RiderFeedbackToOrder(RiderId, RSP.YesOrNo) // fake api
+	c.Set(define.ESSRESPONSE, response.JSONData("success"))
 }
 
 // @Summary feedback to new order
