@@ -47,7 +47,7 @@ func GetUserAgentGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID
 		return
 	}
 
-	var result group.GroupInfoResp
+	result := group.GroupInfoResp{Data: []group.GroupInfoData{}}
 	for _, order := range *Orders {
 		retgroup := group_service.QueryGroupById(order.OrderGroupId)
 
