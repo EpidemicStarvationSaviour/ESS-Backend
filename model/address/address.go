@@ -33,7 +33,7 @@ type AddressCreateReq struct {
 	AddressCity      string `json:"city" form:"city" binding:"required" example:"杭州市"`
 	AddressArea      string `json:"area" form:"area" binding:"required" example:"西湖区"`
 	AddressDetail    string `json:"detail" form:"detail" binding:"required" example:"浙江大学紫金港校区"`
-	IsDefaultAddress bool   `json:"is_default" form:"is_default" binding:"required" example:"true"`
+	IsDefaultAddress bool   `json:"is_default" form:"is_default" example:"true"`
 }
 
 type AddressCreateResp struct {

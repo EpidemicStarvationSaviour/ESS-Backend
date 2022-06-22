@@ -40,9 +40,9 @@ func InitRouter() *gin.Engine {
 	api.GET("/version", api_info.Version)
 
 	userMod := api.Group("/user")
-	userMod.GET("/me", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), user.GetInfo)
+	userMod.GET("/info", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), user.GetInfo)
 	userMod.POST("/register", user.CreateUser)
-	userMod.PUT("/me", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), user.ModifyInfo)
+	userMod.POST("/modify/info", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), user.ModifyInfo)
 	userMod.POST("/address", middleware.AuthenticationMiddleware(), middleware.PurchaserOnly(), address.CreateAddr)
 	userMod.DELETE("/address", middleware.AuthenticationMiddleware(), middleware.PurchaserOnly(), address.DeleteAddr)
 	userMod.GET("/workinfo", middleware.AuthenticationMiddleware(), middleware.LoginOnly(), user.GetDashboard)
