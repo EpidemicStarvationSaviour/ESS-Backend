@@ -170,6 +170,7 @@ func SearchGroup(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	searchinfo.PageNum -= 1
 	userID := policy.GetId()
 	var result group.GroupInfoResp
 
@@ -622,6 +623,7 @@ func GroupInfo(c *gin.Context) {
 	}
 	userID := policy.GetId()
 	role := policy.ConvertToUser().UserRole
+	groupcondition.PageNum -= 1
 	switch role {
 	case user.Purchaser:
 		{
