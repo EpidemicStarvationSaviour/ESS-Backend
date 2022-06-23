@@ -92,7 +92,7 @@ func RiderOnly() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claim, _ := c.Get(define.ESSPOLICY)
 		if policy, ok := claim.(authUtils.Policy); !ok || !policy.RiderOnly() {
-			c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("不是卖家"))
+			c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("不是骑手"))
 			c.Abort()
 			return
 		}

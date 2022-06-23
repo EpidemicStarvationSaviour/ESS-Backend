@@ -3,7 +3,11 @@ package route_service
 import (
 	"ess/model/category"
 	"ess/model/route"
+	"ess/service/group_service"
+	"ess/service/user_service"
+	"ess/utils/amap"
 	"ess/utils/db"
+	"fmt"
 	"time"
 )
 
@@ -74,19 +78,40 @@ func QueryRouteItem(rid int) (*[]route.RouteItem, error) {
 	return &result, err
 }
 
-func QueryGroupTime(gid int) (int64, error) { // TODO: test
+func QuerySetupTime(gid, aid int) (int64, error) {
+	src := user_service.QueryUserById(group_service.QueryGroupById(gid).GroupRiderId)
+	if src.UserId < 0 {
+		return 0, fmt.Errorf("user not found")
+	}
+
+	d, e := amap.DistanceByAid(src.UserDefaultAddressId, aid)
+	return int64(d), e
+}
+
+// uid: dst user id
+// (duration, time, err)
+func QueryGroupTime(gid int, uid int) (int64, time.Time, error) {
 	var result int64 = 0
 	routes, err := QueryRouteByGroupId(gid)
 	if err != nil {
-		return 0, err
+		return 0, time.Now(), err
 	}
 	if len(*routes) == 0 {
-		return 0, nil
+		return 0, time.Now(), nil
 	}
 	var start_at, end_at time.Time
 	if !(*routes)[0].RouteDone {
 		start_at = time.Now()
 		end_at = start_at
+
+		dst := user_service.QueryUserById((*routes)[0].RouteUserId)
+		if dst.UserId < 0 {
+			return 0, time.Now(), fmt.Errorf("user not found")
+		}
+		result, err = QuerySetupTime(gid, dst.UserDefaultAddressId)
+		if err != nil {
+			return 0, time.Now(), err
+		}
 	} else {
 		start_at = *(*routes)[0].RouteFinishedAt
 	}
@@ -97,9 +122,13 @@ func QueryGroupTime(gid int) (int64, error) { // TODO: test
 		} else {
 			result += rt.RouteEstimatedTime
 		}
+		if rt.RouteUserId == uid {
+			break
+		}
 	}
 
 	result += end_at.Unix() - start_at.Unix()
+	end_at = start_at.Add(time.Duration(result * 1e9))
 
-	return result, nil
+	return result, end_at, nil
 }

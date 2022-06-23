@@ -509,13 +509,13 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 	for _, rt := range *routes {
 		retgroup := group_service.QueryGroupById(rt.RouteGroupId)
 
-		status, err := GetGroupStatusForSupplier(retgroup, userID)
+		status, err := GetGroupStatusForSupplier(retgroup, userID) // TODO: test
 		if err != nil {
 			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 			c.Abort()
 			return
 		}
-		if groupcondition.Type == 0 || groupcondition.Type == status { // TODO: test
+		if groupcondition.Type == 0 || groupcondition.Type == status {
 			result.Count++
 			var data group.GroupInfoSupplierData
 			data.GroupCommodity = make([]group.GroupInfoSupplierCommodity, 0)
@@ -525,7 +525,7 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 			data.GroupCreatorName = creator.UserName
 			items, err := route_service.QueryRouteItem(rt.RouteId)
 			if err != nil {
-				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 				c.Abort()
 				return
 			}
@@ -544,12 +544,18 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 				data.GroupRiderPhone = grouprider.UserPhone
 				riderpos, err := address_service.QueryAddressById(grouprider.UserDefaultAddressId)
 				if err != nil {
-					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 					c.Abort()
 					return
 				}
 				copier.Copy(&data.GroupRiderPos, riderpos)
-				data.GroupRiderPos.RouteEstimatedTime = rt.RouteEstimatedTime
+				data.GroupRiderPos.RouteEstimatedTime, _, err = route_service.QueryGroupTime(rt.RouteGroupId, rt.RouteUserId)
+				data.GroupRiderPos.RouteEstimatedTime /= 60
+				if err != nil {
+					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+					c.Abort()
+					return
+				}
 			}
 			result.GroupData = append(result.GroupData, data)
 		}
@@ -594,7 +600,7 @@ func GetRiderGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID int
 			}
 			copier.Copy(&data.GroupCreatorAddress, gpaddr)
 			price := group_service.QueryGroupTotalPriceById(gp.GroupId)
-			log.Printf("price= %f\n", price)
+
 			data.GroupReward = 0.1 * price
 			result.Count++
 			result.GroupData = append(result.GroupData, data)
@@ -680,7 +686,8 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 		return
 	}
 	copier.Copy(&result.GroupRiderPos, rideraddr)
-	result.GroupRiderPos.RouteEstimatedTime, err = route_service.QueryGroupTime(gp.GroupId)
+	result.GroupRiderPos.RouteEstimatedTime, _, err = route_service.QueryGroupTime(gp.GroupId, 0)
+	result.GroupRiderPos.RouteEstimatedTime /= 60
 	if err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 		c.Abort()
@@ -720,7 +727,7 @@ func RiderGetDetail(c *gin.Context, uid int, gid int) {
 	result.GroupCreatorPhone = creator.UserPhone
 	gpaddr, err := address_service.QueryAddressById(gp.GroupAddressId)
 	if err != nil {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 		c.Abort()
 		return
 	}
@@ -728,7 +735,7 @@ func RiderGetDetail(c *gin.Context, uid int, gid int) {
 	myuserinfo := user_service.QueryUserById(uid)
 	myaddr, err := address_service.QueryAddressById(myuserinfo.UserDefaultAddressId)
 	if err != nil {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 		c.Abort()
 		return
 	}
@@ -736,7 +743,7 @@ func RiderGetDetail(c *gin.Context, uid int, gid int) {
 	log.Printf("gid= %d\n", gid)
 	grouproutes, err := route_service.QueryRouteByGroupId(gid)
 	if err != nil {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 		c.Abort()
 		return
 	}
@@ -750,20 +757,22 @@ func RiderGetDetail(c *gin.Context, uid int, gid int) {
 		rtdetail.RouteUserPhone = storeinfo.UserPhone
 		storeaddr, err := address_service.QueryAddressById(storeinfo.UserDefaultAddressId)
 		if err != nil {
-			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 			c.Abort()
 			return
 		}
 		copier.Copy(&rtdetail.RouteUserPos, storeaddr)
 		rtdetail.RouteVisited = rt.RouteDone
-		if rt.RouteDone {
-			rtdetail.RouteVisitedTime = rt.RouteFinishedAt.Unix()
-		} else {
-			rtdetail.RouteVisitedTime = rt.RouteEstimatedTime
+		_, visit_time, err := route_service.QueryGroupTime(gid, rt.RouteUserId)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+			c.Abort()
+			return
 		}
+		rtdetail.RouteVisitedTime = visit_time.Unix()
 		items, err := route_service.QueryRouteItem(rt.RouteId)
 		if err != nil {
-			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 			c.Abort()
 			return
 		}
@@ -779,6 +788,9 @@ func RiderGetDetail(c *gin.Context, uid int, gid int) {
 		}
 		result.GroupRouteDetail = append(result.GroupRouteDetail, rtdetail)
 	}
+
+	price := group_service.QueryGroupTotalPriceById(gp.GroupId)
+	result.GroupReward = 0.1 * price
 
 	c.Set(define.ESSRESPONSE, response.JSONData(&result))
 }
