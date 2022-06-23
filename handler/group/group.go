@@ -50,7 +50,6 @@ func GetUserAgentGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID
 	result := group.GroupInfoResp{Data: []group.GroupInfoData{}}
 	for _, order := range *Orders {
 		retgroup := group_service.QueryGroupById(order.OrderGroupId)
-
 		if groupcondition.Type == 0 || retgroup.GroupStatus == group.Status(groupcondition.Type) {
 			data, err := group_service.GetGroupDetail(retgroup, userinfo.UserId)
 			if err != nil {
@@ -62,6 +61,18 @@ func GetUserAgentGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID
 			result.Data = append(result.Data, *data)
 		}
 	}
+
+	start := groupcondition.PageNum * groupcondition.PageSize
+	end := start + groupcondition.PageSize
+	if start >= result.Count {
+		start = 0
+		end = 0
+	} else if end >= result.Count {
+		end = result.Count
+	}
+	result.Count = end - start
+	result.Data = result.Data[start:end]
+
 	c.Set(define.ESSRESPONSE, response.JSONData(&result))
 }
 
@@ -104,6 +115,7 @@ func LaunchNewGroup(c *gin.Context) {
 	neworder.OrderGroupId = groupinfo.GroupId
 	neworder.OrderAmount = 0
 
+	leader_order_inserted := false
 	if createinfo.GroupUserGroupId != 0 {
 		uids, err := order_service.QueryUidByGroup(createinfo.GroupUserGroupId)
 		if err != nil {
@@ -114,6 +126,9 @@ func LaunchNewGroup(c *gin.Context) {
 			for _, cid := range createinfo.GroupCommodities {
 				neworder.OrderCategoryId = cid
 				neworder.OrderUserId = uid
+				if uid == userID {
+					leader_order_inserted = true
+				}
 				// neworder.OrderUserId = ord.OrderUserId
 				err := order_service.CreateNewOrder(&neworder)
 				if err != nil {
@@ -121,6 +136,15 @@ func LaunchNewGroup(c *gin.Context) {
 					return
 				}
 			}
+		}
+	}
+	if !leader_order_inserted {
+		neworder.OrderCategoryId = createinfo.GroupCommodities[0]
+		neworder.OrderUserId = userID
+		err := order_service.CreateNewOrder(&neworder)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_GROUP_CREATE_FAIL))
+			return
 		}
 	}
 
@@ -183,9 +207,6 @@ func SearchGroup(c *gin.Context) {
 				result.Data = append(result.Data, *data)
 			}
 		}
-
-		log.Printf("%+v", result)
-
 	}
 
 	// creator name
@@ -245,6 +266,17 @@ func SearchGroup(c *gin.Context) {
 		}
 	}
 
+	start := searchinfo.PageNum * searchinfo.PageSize
+	end := start + searchinfo.PageSize
+	if start >= result.Count {
+		start = 0
+		end = 0
+	} else if end >= result.Count {
+		end = result.Count
+	}
+	result.Count = end - start
+	result.Data = result.Data[start:end]
+
 	c.Set(define.ESSRESPONSE, response.JSONData(&result))
 
 }
@@ -301,7 +333,7 @@ func JoinGroup(c *gin.Context) {
 		neworder.OrderAmount = joindata.OrderAmount
 		err := order_service.CreateNewOrder(&neworder)
 		if err != nil {
-			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 			c.Abort()
 			return
 		}
@@ -513,6 +545,18 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 			result.GroupData = append(result.GroupData, data)
 		}
 	}
+
+	start := groupcondition.PageNum * groupcondition.PageSize
+	end := start + groupcondition.PageSize
+	if start >= result.Count {
+		start = 0
+		end = 0
+	} else if end >= result.Count {
+		end = result.Count
+	}
+	result.Count = end - start
+	result.GroupData = result.GroupData[start:end]
+
 	c.Set(define.ESSRESPONSE, response.JSONData(&result))
 }
 
@@ -546,6 +590,18 @@ func GetRiderGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID int
 			result.GroupData = append(result.GroupData, data)
 		}
 	}
+
+	start := groupcondition.PageNum * groupcondition.PageSize
+	end := start + groupcondition.PageSize
+	if start >= result.Count {
+		start = 0
+		end = 0
+	} else if end >= result.Count {
+		end = result.Count
+	}
+	result.Count = end - start
+	result.GroupData = result.GroupData[start:end]
+
 	c.Set(define.ESSRESPONSE, response.JSONData(&result))
 }
 
@@ -566,8 +622,6 @@ func GroupInfo(c *gin.Context) {
 	}
 	userID := policy.GetId()
 	role := policy.ConvertToUser().UserRole
-	log.Printf("userID: %d\n", userID)
-	log.Printf("role: %d\n", role)
 	switch role {
 	case user.Purchaser:
 		{

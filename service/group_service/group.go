@@ -9,7 +9,6 @@ import (
 	"ess/service/user_service"
 	"ess/utils/db"
 	"ess/utils/logging"
-	"log"
 
 	"github.com/jinzhu/copier"
 )
@@ -164,7 +163,6 @@ func GetGroupDetail(grp *group.Group, uid int) (*group.GroupInfoData, error) {
 	resinfo.TotalPrice = QueryGroupTotalPriceById(grp.GroupId)
 	resinfo.TotalMyPrice = QueryGroupUserPriceById(grp.GroupId, uid)
 	CategoryIDs := QueryGroupCategories(grp.GroupId)
-	log.Printf("%+v", CategoryIDs)
 	var commo group.GroupInfoCommodity
 	for _, catid := range *CategoryIDs {
 		catinfo := category_service.QueryCategoryById(catid)

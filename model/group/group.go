@@ -89,7 +89,7 @@ type GroupCreateResp struct {
 }
 
 type GroupSearchReq struct {
-	PageSIze    int    `form:"page_size" json:"page_size"`
+	PageSize    int    `form:"page_size" json:"page_size"`
 	PageNum     int    `form:"page_num" json:"page_num"`
 	SearchType  int    `form:"search_type" json:"search_type"`
 	GroupType   int    `form:"group_type" json:"group_type"`
