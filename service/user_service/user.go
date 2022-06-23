@@ -3,6 +3,7 @@ package user_service
 import (
 	"ess/model/address"
 	"ess/model/user"
+	"ess/service/address_service"
 	"ess/utils/amap_base"
 	"ess/utils/cache"
 	"ess/utils/db"
@@ -158,6 +159,12 @@ func ValidUser(user user.UserCreateReq) (*address.Address, bool) {
 }
 
 func CreateUserWithAddress(user *user.User, addr *address.Address) error {
+	err := address_service.CreateAddress(addr)
+	if err != nil {
+		return err
+	}
+	user.UserDefaultAddressId = addr.AddressId
+
 	tx := db.MysqlDB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -169,12 +176,6 @@ func CreateUserWithAddress(user *user.User, addr *address.Address) error {
 		return err
 	}
 
-	if err := tx.Create(addr).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	user.UserDefaultAddressId = addr.AddressId
 	if err := tx.Create(user).Error; err != nil {
 		tx.Rollback()
 		return err

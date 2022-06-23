@@ -106,14 +106,16 @@ func RefreshOrderStatus(uid int, RFTO rider.FeedbackToOrder) {
 		var rout route.Route
 		rout, _ = route_service.QueryRouteByUserAndGroup(RFTO.StoreId, RFTO.GroupId)
 		rout.RouteDone = true
-		rout.RouteFinishedAt = time.Now()
+		t := time.Now()
+		rout.RouteFinishedAt = &t
 		db.MysqlDB.Model(rout).Updates(rout)
 	}
 	if usr.UserRole == 3 || usr.UserRole == 4 {
 		var rout route.Route
 		rout, _ = route_service.QueryRouteByUserAndGroup(RFTO.StoreId, RFTO.GroupId)
 		rout.RouteDone = true
-		rout.RouteFinishedAt = time.Now()
+		t := time.Now()
+		rout.RouteFinishedAt = &t
 		db.MysqlDB.Model(rout).Updates(rout)
 		var grou group.Group
 		db.MysqlDB.Where(&group.Group{GroupId: OrderId}).Find(&grou)

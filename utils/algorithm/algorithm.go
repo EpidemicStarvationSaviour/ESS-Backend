@@ -39,7 +39,7 @@ func Setup() {
 	}
 }
 
-func Schedule(gid, uid int) error { // TODO(TO/GA): test
+func Schedule(gid, uid int) error {
 	if !enable {
 		return fmt.Errorf("rpc server is not enabled")
 	}
@@ -55,6 +55,7 @@ func Schedule(gid, uid int) error { // TODO(TO/GA): test
 	for _, c := range grp_info.Commodities {
 		category_map.Insert(cnt, c.CategoryId)
 		request_items[cnt] = c.TotalAmount
+		cnt++
 	}
 
 	cnt = 1
@@ -106,7 +107,7 @@ func Schedule(gid, uid int) error { // TODO(TO/GA): test
 	}
 	// (1, 2) (1, 3)...(1, m) (2, 3) (2, 4)...(2, m) ... (n, m)
 	for i, s := range suppliers {
-		for j := i + 1; j < len(distances); j++ {
+		for j := i + 1; j < len(suppliers); j++ {
 			dis, err := address_service.QueryDistanceCacheByAid(s.UserDefaultAddressId, suppliers[j].UserDefaultAddressId)
 			if err != nil {
 				return err
@@ -122,6 +123,12 @@ func Schedule(gid, uid int) error { // TODO(TO/GA): test
 		}
 	}
 
+	// log.Printf("request: %+v", request_items)
+	// log.Printf("riders: %+v", len(riders))
+	// log.Printf("items: %+v", supplier_items)
+	// log.Printf("distances: %+v", distances)
+	// return fmt.Errorf("debug")
+
 	// gRPC call
 	resp, err := s.Schedule(&pb.ScheduleRequest{
 		Request: &pb.ItemList{
@@ -132,8 +139,10 @@ func Schedule(gid, uid int) error { // TODO(TO/GA): test
 		Distance:     distances,
 	})
 	if err != nil {
-		logging.ErrorF("could not schedule: %v", err)
+		logging.ErrorF("could not schedule: %+v", err)
 	}
+	// log.Printf("%+v", resp)
+	// return fmt.Errorf("debug")
 
 	// database transaction
 	tx := db.MysqlDB.Begin()
@@ -182,19 +191,21 @@ func Schedule(gid, uid int) error { // TODO(TO/GA): test
 		}
 
 		for id, amount := range r.Itemlist.Items {
-			cid, _ := category_map.Get(id)
-			rt.RouteItems = append(rt.RouteItems, route.RouteItem{
-				RouteId:             rt.RouteId,
-				RouteItemCategoryId: cid.(int),
-				RouteItemAmount:     amount,
-			})
-			if err := tx.Model(&item.Item{}).Where(&item.Item{ItemUserId: rt.RouteUserId, ItemCategoryId: cid.(int)}).UpdateColumn("item_amount", gorm.Expr("item_amount - ?", amount)).Error; err != nil {
-				tx.Rollback()
-				return err
+			if amount != 0 {
+				cid, _ := category_map.Get(id)
+				rt.RouteItems = append(rt.RouteItems, route.RouteItem{
+					RouteId:             rt.RouteId,
+					RouteItemCategoryId: cid.(int),
+					RouteItemAmount:     amount,
+				})
+				if err := tx.Model(&item.Item{}).Where(&item.Item{ItemUserId: rt.RouteUserId, ItemCategoryId: cid.(int)}).UpdateColumn("item_amount", gorm.Expr("item_amount - ?", amount)).Error; err != nil {
+					tx.Rollback()
+					return err
+				}
 			}
 		}
 
-		if err := tx.Model(&route.Route{}).Updates(&rt).Error; err != nil {
+		if err := tx.Model(&rt).Association("RouteItems").Replace(rt.RouteItems); err != nil {
 			tx.Rollback()
 			return err
 		}

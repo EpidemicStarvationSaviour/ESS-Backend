@@ -475,7 +475,7 @@ func EditGroup(c *gin.Context) {
 	// assume that if the status is changed, then nothing else is changed
 	if old_status == group.Created && editinfo.GroupStatus == group.Submitted {
 		if err := algorithm.Schedule(newgroup.GroupId, policy.GetId()); err != nil {
-			logging.ErrorF("schedule group %d failed: +v\n", newgroup.GroupId, err)
+			logging.ErrorF("schedule group %d failed: %+v\n", newgroup.GroupId, err)
 			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_ALGORITHM))
 			c.Abort()
 			return

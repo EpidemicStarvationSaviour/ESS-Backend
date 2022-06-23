@@ -88,12 +88,12 @@ func QueryGroupTime(gid int) (int64, error) { // TODO: test
 		start_at = time.Now()
 		end_at = start_at
 	} else {
-		start_at = (*routes)[0].RouteFinishedAt
+		start_at = *(*routes)[0].RouteFinishedAt
 	}
 
 	for _, rt := range *routes {
 		if rt.RouteDone {
-			end_at = rt.RouteFinishedAt
+			end_at = *rt.RouteFinishedAt
 		} else {
 			result += rt.RouteEstimatedTime
 		}
