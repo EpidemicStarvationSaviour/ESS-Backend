@@ -24,7 +24,7 @@ import (
 // @Tags    user
 // @Produce json
 // @Success 200 {object} user.UserInfoResp
-// @Router  /user/me [get]
+// @Router  /user/info [get]
 func GetInfo(c *gin.Context) {
 	claim, _ := c.Get(define.ESSPOLICY)
 	policy, _ := claim.(authUtils.Policy)
@@ -73,7 +73,7 @@ func GetInfo(c *gin.Context) {
 // @Produce json
 // @Param data body user.UserModifyReq true "user's new information"
 // @Success 200 {string} string "'success'"
-// @Router  /user/me [put]
+// @Router  /user/modify/info [post]
 func ModifyInfo(c *gin.Context) {
 	claim, _ := c.Get(define.ESSPOLICY)
 	policy, _ := claim.(authUtils.Policy)
@@ -102,7 +102,7 @@ func ModifyInfo(c *gin.Context) {
 		return
 	}
 
-	if req.UserRole != user.Leader || userRec.UserRole != user.Purchaser {
+	if req.UserRole != 0 && (req.UserRole != user.Leader || userRec.UserRole != user.Purchaser) {
 		c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("权限变更只允许从购买者变为团长"))
 		c.Abort()
 		return
@@ -134,6 +134,16 @@ func ModifyInfo(c *gin.Context) {
 	}
 
 	user_service.CleanUserCache(oldUser)
+
+	if req.UserRole != 0 || len(req.UserName) > 0 || len(req.UserPhone) > 0 {
+		jwt, err := authUtils.GetUserToken(userRec)
+		if err != nil {
+			logging.ErrorF("generate token error for user:%+v\n", userRec)
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_TOKEN_GENERATE_FAIL))
+			c.Abort()
+		}
+		c.SetCookie(define.ESSTOKEN, "Bearer "+jwt, int(setting.ServerSetting.JwtExpireTime.Seconds()), "/", "", false, true)
+	}
 
 	c.Set(define.ESSRESPONSE, response.JSONData("success"))
 }

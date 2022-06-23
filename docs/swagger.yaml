@@ -20,7 +20,6 @@ definitions:
     - area
     - city
     - detail
-    - is_default
     - province
     type: object
   address.AddressCreateResp:
@@ -1021,7 +1020,7 @@ paths:
       summary: add address
       tags:
       - user
-  /user/me:
+  /user/info:
     get:
       produces:
       - application/json
@@ -1033,7 +1032,8 @@ paths:
       summary: get user info
       tags:
       - user
-    put:
+  /user/modify/info:
+    post:
       parameters:
       - description: user's new information
         in: body

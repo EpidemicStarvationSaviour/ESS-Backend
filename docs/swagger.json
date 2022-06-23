@@ -759,7 +759,7 @@
                 }
             }
         },
-        "/user/me": {
+        "/user/info": {
             "get": {
                 "produces": [
                     "application/json"
@@ -776,8 +776,10 @@
                         }
                     }
                 }
-            },
-            "put": {
+            }
+        },
+        "/user/modify/info": {
+            "post": {
                 "produces": [
                     "application/json"
                 ],
@@ -882,7 +884,6 @@
                 "area",
                 "city",
                 "detail",
-                "is_default",
                 "province"
             ],
             "properties": {

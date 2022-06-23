@@ -81,6 +81,9 @@ func CreateUser(user *user.User) error {
 func UpdateUser(user *user.User) error {
 	err := db.MysqlDB.Model(user).Updates(user).Error
 	if err == nil {
+		if err := db.MysqlDB.First(&user).Error; err != nil {
+			return err
+		}
 		cache.Set(cache.GetKey(cache.UserInfo, user.UserId), user)
 	}
 	return err

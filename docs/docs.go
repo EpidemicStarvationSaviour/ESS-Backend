@@ -771,7 +771,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/me": {
+        "/user/info": {
             "get": {
                 "produces": [
                     "application/json"
@@ -788,8 +788,10 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "put": {
+            }
+        },
+        "/user/modify/info": {
+            "post": {
                 "produces": [
                     "application/json"
                 ],
@@ -894,7 +896,6 @@ const docTemplate = `{
                 "area",
                 "city",
                 "detail",
-                "is_default",
                 "province"
             ],
             "properties": {
