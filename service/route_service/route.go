@@ -80,6 +80,9 @@ func QueryGroupTime(gid int) (int64, error) { // TODO: test
 	if err != nil {
 		return 0, err
 	}
+	if len(*routes) == 0 {
+		return 0, nil
+	}
 	var start_at, end_at time.Time
 	if !(*routes)[0].RouteDone {
 		start_at = time.Now()

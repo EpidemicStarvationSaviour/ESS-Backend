@@ -52,8 +52,13 @@ func CreateGroup(gp *group.Group) error {
 }
 
 func UpdateGroup(gp *group.Group) error {
-	if err := db.MysqlDB.Select("*").Updates(gp).Error; err != nil {
+	if err := db.MysqlDB.Updates(gp).Error; err != nil {
 		return err
+	}
+	if len(gp.GroupCategories) > 0 {
+		if err := db.MysqlDB.Model(&gp).Association("GroupCategories").Replace(gp.GroupCategories); err != nil {
+			return err
+		}
 	}
 	return nil
 }

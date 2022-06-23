@@ -440,7 +440,7 @@ func EditGroup(c *gin.Context) {
 		for j := range newgroup.GroupCategories {
 			if editinfo.GroupCommodityIds[i] == newgroup.GroupCategories[j].CategoryId {
 				editinfo.GroupCommodityIds[i] = -1
-				newgroup.GroupCategories[j].CategoryId = -newgroup.GroupCategories[j].CategoryId // TODO: test
+				newgroup.GroupCategories[j].CategoryId = -newgroup.GroupCategories[j].CategoryId
 			}
 		}
 	}
@@ -477,7 +477,7 @@ func EditGroup(c *gin.Context) {
 
 	err = group_service.UpdateGroup(&newgroup)
 	if err != nil {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 		c.Abort()
 		return
 	}
@@ -653,7 +653,7 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 	result.GroupCreatorPhone = creator.UserPhone
 	gpaddr, err := address_service.QueryAddressById(gp.GroupAddressId)
 	if err != nil {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 		c.Abort()
 		return
 	}
@@ -663,14 +663,14 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 	result.GroupRiderPhone = rider.UserPhone
 	rideraddr, err := address_service.QueryAddressById(rider.UserDefaultAddressId)
 	if err != nil {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 		c.Abort()
 		return
 	}
 	copier.Copy(&result.GroupRiderPos, rideraddr)
 	result.GroupRiderPos.RouteEstimatedTime, err = route_service.QueryGroupTime(gp.GroupId)
 	if err != nil {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 		c.Abort()
 		return
 	}
