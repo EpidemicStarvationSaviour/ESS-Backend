@@ -15,7 +15,7 @@ func QueryCategoryById(cid int) *category.Category {
 }
 
 func QueryAllCategory() (*[]category.Category, error) {
-	var category []category.Category
+	category := []category.Category{}
 	if err := db.MysqlDB.Find(&category).Error; err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func QueryAllCategory() (*[]category.Category, error) {
 }
 
 func QueryMyCategory(uid int) (*[]category.Category, error) {
-	var cat []category.Category
+	cat := []category.Category{}
 	var ite []item.Item
 	db.MysqlDB.Where(&item.Item{ItemUserId: uid}).Find(&ite)
 	for _, cate := range ite {
@@ -34,7 +34,7 @@ func QueryMyCategory(uid int) (*[]category.Category, error) {
 	return &cat, nil
 }
 func QueryCategoryByTypeId(fatherid int) ([]category.Category, error) {
-	var categorys []category.Category
+	categorys := []category.Category{}
 	err := db.MysqlDB.Where(&category.Category{CategoryFatherId: fatherid}).Find(&categorys).Error //where是干嘛的
 	return categorys, err
 }
@@ -102,7 +102,7 @@ func QueryCategoryByCid(cid int) (*category.Category, error) {
 }
 
 func QueryItemByCid(cid int) (*[]item.Item, error) {
-	var ite []item.Item
+	ite := []item.Item{}
 	if err := db.MysqlDB.Where(&item.Item{ItemCategoryId: cid}).Find(&ite).Error; err != nil { //数据库的返回值
 		return nil, err
 	}

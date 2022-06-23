@@ -7,7 +7,7 @@ import (
 )
 
 func QueryOrderByUser(uid int) (*[]order.Order, error) {
-	var orders []order.Order
+	orders := []order.Order{}
 	if err := db.MysqlDB.Where(&order.Order{OrderUserId: uid}).Find(&orders).Error; err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func CreateNewOrder(ord *order.Order) error {
 }
 
 func QueryUidByGroup(gid int) (*[]int, error) {
-	var resid []int
+	resid := []int{}
 	if err := db.MysqlDB.Model(&order.Order{}).Select([]string{"order_user_id"}).Distinct([]string{"order_user_id"}).Where(&order.Order{OrderGroupId: gid}).Find(resid).Error; err != nil {
 		return &resid, err
 	}
@@ -30,7 +30,7 @@ func QueryUidByGroup(gid int) (*[]int, error) {
 }
 
 func QueryOrderByGroupCategory(gid int, cid int) *[]order.Order {
-	var resorder []order.Order
+	resorder := []order.Order{}
 	orderinfo := db.MysqlDB.Where(&order.Order{OrderGroupId: gid, OrderCategoryId: cid}).Find(&resorder)
 	if orderinfo.RowsAffected == 0 {
 		logging.InfoF("Group Has No Order With gid %d and cid %d!\n", gid, cid)
@@ -40,7 +40,7 @@ func QueryOrderByGroupCategory(gid int, cid int) *[]order.Order {
 }
 
 func QueryOrderByGroup(gid int) (*[]order.Order, error) {
-	var orders []order.Order
+	orders := []order.Order{}
 	if err := db.MysqlDB.Where(&order.Order{OrderGroupId: gid}).Find(&orders).Error; err != nil {
 		return nil, err
 	}

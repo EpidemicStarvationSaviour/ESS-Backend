@@ -6,7 +6,7 @@ import (
 )
 
 func QueryUserByRoll(roll int) (*[]user.User, error) {
-	var users []user.User
+	users := []user.User{}
 	if err := db.MysqlDB.Where(&user.User{UserRole: user.Role(roll)}).Find(&users).Error; err != nil {
 		return nil, err
 	}
@@ -14,7 +14,7 @@ func QueryUserByRoll(roll int) (*[]user.User, error) {
 }
 
 func QueryAllUser() (*[]user.User, error) {
-	var users []user.User
+	users := []user.User{}
 	if err := db.MysqlDB.Find(&users).Error; err != nil {
 		return nil, err
 	}

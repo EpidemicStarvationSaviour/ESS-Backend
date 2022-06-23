@@ -194,13 +194,13 @@ func DeleteUserById(uid int) error {
 }
 
 func QueryAvailableRiders() ([]user.User, error) {
-	var ret []user.User
+	ret := []user.User{}
 	err := db.MysqlDB.Model(&user.User{}).Where(&user.User{UserRole: user.Rider, UserAvailable: true}).Find(&ret).Error
 	return ret, err
 }
 
 func QueryUsersByRole(role user.Role) ([]user.User, error) {
-	var ret []user.User
+	ret := []user.User{}
 	err := db.MysqlDB.Model(&user.User{}).Where(&user.User{UserRole: role}).Find(&ret).Error
 	return ret, err
 }

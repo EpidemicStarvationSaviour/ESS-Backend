@@ -10,13 +10,13 @@ func DeleteItemByUserId(uid int) error {
 }
 
 func QueryItemsByUserId(uid int) ([]item.Item, error) {
-	var items []item.Item
+	items := []item.Item{}
 	err := db.MysqlDB.Where(&item.Item{ItemUserId: uid}).Find(&items).Error
 	return items, err
 }
 
 func QueryItemsByCategoryId(cid int) ([]item.Item, error) {
-	var items []item.Item
+	items := []item.Item{}
 	err := db.MysqlDB.Where(&item.Item{ItemUserId: cid}).Find(&items).Error
 	return items, err
 }

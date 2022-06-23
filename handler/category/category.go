@@ -216,7 +216,7 @@ func GetMyCategoryDetails(c *gin.Context) {
 		return
 	}
 
-	var result []category.CategoryMyInfoResp
+	result := []category.CategoryMyInfoResp{}
 
 	for _, cat := range *cate {
 		var data category.CategoryMyInfoResp

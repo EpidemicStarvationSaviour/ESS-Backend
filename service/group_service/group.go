@@ -14,21 +14,21 @@ import (
 )
 
 func QueryGroupByName(name string) *[]group.Group {
-	var groups []group.Group
+	groups := []group.Group{}
 	resinfo := db.MysqlDB.Where("group_name LIKE ?", "%"+name+"%").Find(&groups)
 	logging.InfoF("Find %d groups with name %s\n", resinfo.RowsAffected, name)
 	return &groups
 }
 
 func QueryGroupByDescription(des string) *[]group.Group {
-	var groups []group.Group
+	groups := []group.Group{}
 	resinfo := db.MysqlDB.Where("group_description LIKE ?", "%"+des+"%").Find(&groups)
 	logging.InfoF("Find %d groups with description %s\n", resinfo.RowsAffected, des)
 	return &groups
 }
 
 func QueryGroupByCreatorId(cid int) *[]group.Group {
-	var groups []group.Group
+	groups := []group.Group{}
 	resinfo := db.MysqlDB.Where(&group.Group{GroupCreatorId: cid}).Find(&groups)
 	logging.InfoF("Find %d groups with creatorID %d\n", resinfo.RowsAffected, cid)
 	return &groups
@@ -101,7 +101,7 @@ func QueryGroupUserPriceById(gid int, uid int) float64 {
 }
 
 func QueryGroupCategories(gid int) *[]int {
-	var catids []int
+	catids := []int{}
 
 	resinfo := db.MysqlDB.Raw("SELECT category_category_id FROM group_category WHERE group_group_id = ?", gid).Scan(&catids)
 	if resinfo.RowsAffected == 0 {
@@ -144,7 +144,7 @@ func DeleteGroupById(gid int) error {
 }
 
 func QueryGroupByRider(rid int) (*[]group.Group, error) {
-	var result []group.Group
+	result := []group.Group{}
 	err := db.MysqlDB.Where(&group.Group{GroupRiderId: rid}).Find(&result).Error
 	return &result, err
 }
