@@ -46,6 +46,11 @@ func GetCategoryList(c *gin.Context) {
 			copier.Copy(&data, &cat)
 			var catechild []category.Category
 			catechild, err = category_service.QueryCategoryByTypeId(cat.CategoryId)
+			if err != nil {
+				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+				c.Abort()
+				return
+			}
 			data.CategoryLevel = cat.CategoryId
 			for _, categchild := range catechild {
 				data.CategoryNumber++
@@ -59,7 +64,7 @@ func GetCategoryList(c *gin.Context) {
 			result.CategoryList = append(result.CategoryList, data)
 		}
 	}
-	c.Set(define.ESSRESPONSE, response.JSONData(&result))
+	c.Set(define.ESSRESPONSE, response.JSONData(&result.CategoryList))
 }
 
 // @Summary add category
