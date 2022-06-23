@@ -217,7 +217,7 @@ func SearchGroup(c *gin.Context) {
 		groups := group_service.QueryGroupByCreatorId(CreatorId)
 
 		for _, retgroup := range *groups {
-			if retgroup.GroupStatus == group.Status(searchinfo.GroupType) {
+			if searchinfo.GroupType == 0 || retgroup.GroupStatus == group.Status(searchinfo.GroupType) {
 				data, err := group_service.GetGroupDetail(&retgroup, userID)
 				if err != nil {
 					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
@@ -255,7 +255,7 @@ func SearchGroup(c *gin.Context) {
 		groups := group_service.QueryGroupByDescription(searchinfo.SearchValue)
 
 		for _, retgroup := range *groups {
-			if retgroup.GroupStatus == group.Status(searchinfo.GroupType) {
+			if searchinfo.GroupType == 0 || retgroup.GroupStatus == group.Status(searchinfo.GroupType) {
 				data, err := group_service.GetGroupDetail(&retgroup, userID)
 				if err != nil {
 					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
