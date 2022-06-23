@@ -50,6 +50,7 @@ func GetAllUsers(c *gin.Context) {
 		return
 	}
 	var result admin.AllUserResp
+	result.UserList = make([]admin.UserData, 0)
 
 	for _, usr := range *users {
 		result.UserCount++

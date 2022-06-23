@@ -31,10 +31,11 @@ func GetInfo(c *gin.Context) {
 
 	if policy.SysAdminOnly() {
 		sysAdminResp := user.UserInfoResp{
-			UserId:    setting.AdminSetting.UserId,
-			UserName:  setting.AdminSetting.Name,
-			UserRole:  user.SysAdmin,
-			UserPhone: setting.AdminSetting.Phone,
+			UserId:      setting.AdminSetting.UserId,
+			UserName:    setting.AdminSetting.Name,
+			UserRole:    user.SysAdmin,
+			UserPhone:   setting.AdminSetting.Phone,
+			UserAddress: make([]user.UserInfoRespAddress, 0),
 		}
 		c.Set(define.ESSRESPONSE, response.JSONData(sysAdminResp))
 		return
@@ -57,6 +58,7 @@ func GetInfo(c *gin.Context) {
 	}
 
 	resp := user.UserInfoResp{}
+	resp.UserAddress = make([]user.UserInfoRespAddress, 0)
 	_ = copier.Copy(&resp, &userRec)
 	for _, v := range addr {
 		var address user.UserInfoRespAddress

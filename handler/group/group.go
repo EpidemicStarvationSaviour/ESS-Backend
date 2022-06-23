@@ -173,6 +173,7 @@ func SearchGroup(c *gin.Context) {
 	searchinfo.PageNum -= 1
 	userID := policy.GetId()
 	var result group.GroupInfoResp
+	result.Data = []group.GroupInfoData{}
 
 	// group name
 	if searchinfo.SearchType == 0 {
@@ -359,6 +360,7 @@ func AgentOwnGroup(c *gin.Context) {
 	}
 	userID := policy.GetId()
 	var result group.GroupInfoResp
+	result.Data = make([]group.GroupInfoData, 0)
 	mygroup := group_service.QueryGroupByCreatorId(userID)
 	for _, grp := range *mygroup {
 		if groupreq.Type == 0 || grp.GroupStatus == group.Status(groupreq.Type) {
@@ -499,6 +501,7 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 	}
 
 	var result group.GroupInfoSupplierResp
+	result.GroupData = make([]group.GroupInfoSupplierData, 0)
 	for _, rt := range *routes {
 		retgroup := group_service.QueryGroupById(rt.RouteGroupId)
 
@@ -511,6 +514,7 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 		if groupcondition.Type == 0 || groupcondition.Type == status { // TODO: test
 			result.Count++
 			var data group.GroupInfoSupplierData
+			data.GroupCommodity = make([]group.GroupInfoSupplierCommodity, 0)
 			copier.Copy(&data, &retgroup)
 			creator := user_service.QueryUserById(retgroup.GroupCreatorId)
 			data.GroupCreatorPhone = creator.UserPhone
@@ -564,6 +568,7 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 func GetRiderGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID int) {
 	mygroup, err := group_service.QueryGroupByRider(userID)
 	var result group.GroupInfoRiderResp
+	result.GroupData = make([]group.GroupInfoRiderData, 0)
 	if err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 		c.Abort()
@@ -646,6 +651,7 @@ func GroupInfo(c *gin.Context) {
 
 func AgentGetDetail(c *gin.Context, uid int, gid int) {
 	var result group.GroupAgentDetail
+	result.GroupCommodities = make([]group.GroupAgentCommodity, 0)
 	gp := group_service.QueryGroupById(gid)
 	copier.Copy(&result, gp)
 	result.GroupTotalPrice = group_service.QueryGroupTotalPriceById(gid)
@@ -680,6 +686,7 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 
 	for _, cid := range *CategoryIDs {
 		var commo group.GroupAgentCommodity
+		commo.CategoryUser = make([]group.GroupAgentCommodityUser, 0)
 		catinfo := category_service.QueryCategoryById(cid)
 		copier.Copy(&commo, catinfo)
 		commo.Id = catinfo.CategoryFatherId
@@ -700,6 +707,7 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 
 func RiderGetDetail(c *gin.Context, uid int, gid int) {
 	var result group.GroupRiderDetail
+	result.GroupRouteDetail = make([]group.GroupRiderRoute, 0)
 	gp := group_service.QueryGroupById(gid)
 	copier.Copy(&result, gp)
 

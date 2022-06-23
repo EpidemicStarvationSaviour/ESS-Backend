@@ -38,9 +38,11 @@ func GetCategoryList(c *gin.Context) {
 	}
 
 	var result category.CategoryAllResp
+	result.CategoryList = make([]category.CategoryInfoResp, 0)
 
 	for _, cat := range *cate {
 		var data category.CategoryInfoResp
+		data.Categorychild = make([]category.CategoryChildren, 0)
 		data.CategoryNumber = 0
 		if cat.CategoryLevel == 0 {
 			copier.Copy(&data, &cat)
@@ -163,6 +165,7 @@ func GetCateDetail(c *gin.Context) {
 		return
 	}
 	var data category.CategoryCertainInfoResp
+	data.CategoryDetails = make([]category.CategoryDetailsInfo, 0)
 	copier.Copy(&data, &cat)
 	var totalnumber float64
 	totalnumber = 0
@@ -221,6 +224,7 @@ func GetMyCategoryDetails(c *gin.Context) {
 	for _, cat := range *cate {
 		var data category.CategoryMyInfoResp
 		data.CategoryNumber = 0
+		data.Categorychild = make([]category.CategoryMyChildren, 0)
 		if cat.CategoryLevel == 0 {
 			copier.Copy(&data, &cat)
 			var catechild []category.Category

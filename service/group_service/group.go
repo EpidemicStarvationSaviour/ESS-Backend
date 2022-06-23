@@ -151,6 +151,7 @@ func QueryGroupByRider(rid int) (*[]group.Group, error) {
 
 func GetGroupDetail(grp *group.Group, uid int) (*group.GroupInfoData, error) {
 	var resinfo group.GroupInfoData
+	resinfo.Commodities = make([]group.GroupInfoCommodity, 0)
 	groupaddr, err := address_service.QueryAddressById(grp.GroupAddressId)
 	if err != nil {
 		return &resinfo, err
