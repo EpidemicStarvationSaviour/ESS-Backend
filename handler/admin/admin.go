@@ -38,15 +38,9 @@ func GetAllUsers(c *gin.Context) {
 	var err error
 
 	switch UserCondition.Type {
-	case 0:
-		users, err = admin_service.QueryUserByRoll(1)
-	case 1:
-		users, err = admin_service.QueryUserByRoll(2)
-	case 2:
-		users, err = admin_service.QueryUserByRoll(3)
-	case 3:
-		users, err = admin_service.QueryUserByRoll(4)
-	case 4:
+	case 1, 2, 3, 4:
+		users, err = admin_service.QueryUserByRoll(UserCondition.Type)
+	default:
 		users, err = admin_service.QueryAllUser()
 	}
 
@@ -61,7 +55,7 @@ func GetAllUsers(c *gin.Context) {
 		result.UserCount++
 		var data admin.UserData
 		copier.Copy(&data, &usr)
-		data.UserRole++
+		//data.UserRole++
 		Adds, err := address_service.QueryAddressesByUserId(usr.UserId)
 		if err != nil {
 			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
