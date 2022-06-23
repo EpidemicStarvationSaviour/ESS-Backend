@@ -299,8 +299,12 @@ func JoinGroup(c *gin.Context) {
 		return
 	}
 	userID := policy.GetId()
-	// joingroup = group_service.QueryGroupById(joininfo.GroupId)
-	// groupuserIDs, err := order_service.QueryUidByGroup(joininfo.GroupId)
+	joingroup := group_service.QueryGroupById(joininfo.GroupId)
+	if joingroup.GroupStatus != group.Created {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
 
 	groupords, err := order_service.QueryOrderByGroup(joininfo.GroupId)
 	if err != nil {
@@ -310,16 +314,16 @@ func JoinGroup(c *gin.Context) {
 	}
 	for _, ord := range *groupords {
 		if userID == ord.OrderUserId {
-			for _, cat := range joininfo.OrderData {
+			for id, cat := range joininfo.OrderData {
 				if cat.OrderCategoryId == ord.OrderCategoryId {
 					ord.OrderAmount = cat.OrderAmount
 					err := order_service.UpdateOrder(ord)
 					if err != nil {
-						c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+						c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 						c.Abort()
 						return
 					}
-					cat.OrderCategoryId = -1
+					joininfo.OrderData[id].OrderCategoryId = -1
 				}
 			}
 		}

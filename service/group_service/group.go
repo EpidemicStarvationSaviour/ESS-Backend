@@ -174,6 +174,7 @@ func GetGroupDetail(grp *group.Group, uid int) (*group.GroupInfoData, error) {
 		catinfo := category_service.QueryCategoryById(catid)
 		copier.Copy(&commo, catinfo)
 		commo.OrderAmount = 0
+		commo.TotalAmount = 0
 		commo.ParentId = catinfo.CategoryFatherId
 		orders := order_service.QueryOrderByGroupCategory(grp.GroupId, catid)
 		for _, ord := range *orders {

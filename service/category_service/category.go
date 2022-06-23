@@ -111,10 +111,20 @@ func QueryItemByCid(cid int) (*[]item.Item, error) {
 
 func ModifyCategoryNumberByCid(uid int, cid int, number float64) int {
 	var ite item.Item
-	if err := db.MysqlDB.Where(&item.Item{ItemUserId: uid, ItemCategoryId: cid}).First(&ite).Error; err != nil {
-
+	var ites []item.Item
+	if err := db.MysqlDB.Where(&item.Item{ItemUserId: uid, ItemCategoryId: cid}).Find(&ites).Error; err != nil {
 		return 0
 	}
+	if len(ites) == 0 {
+		ite.ItemAmount = number
+		ite.ItemCategoryId = cid
+		ite.ItemUserId = uid
+		if err := db.MysqlDB.Create(&ite).Error; err != nil {
+			return 0
+		}
+		return 1
+	}
+	ite = ites[0]
 	ite.ItemAmount = ite.ItemAmount + number
 
 	if ite.ItemAmount < 0 {
