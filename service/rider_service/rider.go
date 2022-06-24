@@ -74,11 +74,11 @@ func QueryAvailableOrder() (error, *rider.RiderQueryNewOrdersResp) {
 	}
 	availableorder.OrderRemark = grou.GroupRemark
 	//availableorder.OrderDistance = 0
-	availableorder.OrderExpectedTime, _, err = route_service.QueryGroupTime(grou.GroupId, 0)
-	availableorder.OrderExpectedTime /= 60
+	_, est_end_time, err := route_service.QueryGroupTime(grou.GroupId, 0)
 	if err != nil {
 		return err, nil
 	}
+	availableorder.OrderExpectedTime = int64(time.Since(est_end_time).Minutes())
 
 	return nil, &availableorder
 }

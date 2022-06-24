@@ -17,6 +17,7 @@ import (
 	"ess/utils/response"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -549,13 +550,13 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 					return
 				}
 				copier.Copy(&data.GroupRiderPos, riderpos)
-				data.GroupRiderPos.RouteEstimatedTime, _, err = route_service.QueryGroupTime(rt.RouteGroupId, rt.RouteUserId)
-				data.GroupRiderPos.RouteEstimatedTime /= 60
+				_, est_end_time, err := route_service.QueryGroupTime(rt.RouteGroupId, rt.RouteUserId)
 				if err != nil {
 					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 					c.Abort()
 					return
 				}
+				data.GroupRiderPos.RouteEstimatedTime = int64(time.Since(est_end_time).Minutes())
 			}
 			result.GroupData = append(result.GroupData, data)
 		}
@@ -686,13 +687,13 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 		return
 	}
 	copier.Copy(&result.GroupRiderPos, rideraddr)
-	result.GroupRiderPos.RouteEstimatedTime, _, err = route_service.QueryGroupTime(gp.GroupId, 0)
-	result.GroupRiderPos.RouteEstimatedTime /= 60
+	_, est_end_time, err := route_service.QueryGroupTime(gp.GroupId, 0)
 	if err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 		c.Abort()
 		return
 	}
+	result.GroupRiderPos.RouteEstimatedTime = int64(time.Since(est_end_time).Minutes())
 	CategoryIDs := group_service.QueryGroupCategories(gp.GroupId)
 
 	for _, cid := range *CategoryIDs {
