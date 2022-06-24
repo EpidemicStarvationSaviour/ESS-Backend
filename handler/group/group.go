@@ -430,7 +430,7 @@ func EditGroup(c *gin.Context) {
 		return
 	}
 
-	groupords, err := order_service.QueryOrderByGroup(userID)
+	groupords, err := order_service.QueryOrderByGroup(newgroup.GroupId)
 	if err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 		c.Abort()
