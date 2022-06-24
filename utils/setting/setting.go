@@ -83,10 +83,10 @@ type Amap struct {
 var AmapSetting = &Amap{}
 
 // init the setting struct
-func Setup() {
-	Cfg, err := ini.Load("conf/app.ini")
+func Setup(path string) {
+	Cfg, err := ini.Load(path)
 	if err != nil {
-		log.Fatalf("Fail to parse `conf/app.ini` : %v", err)
+		log.Fatalf("Fail to parse `%v` : %v", path, err)
 	}
 
 	//---------------- app config ----------------------

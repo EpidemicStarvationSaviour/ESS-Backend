@@ -17,7 +17,7 @@ func main() {
 	// init function will be called in order of dependency, so much time it's not very obviously
 	// so we rename `init` to `Setup` and call them in our needed orders.
 
-	setting.Setup()
+	setting.Setup("conf/app.ini")
 	cache.Setup()
 	logging.Setup()
 	db.Setup()
