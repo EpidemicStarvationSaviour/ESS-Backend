@@ -45,7 +45,7 @@ func GetCategoryList(c *gin.Context) {
 		data.Categorychild = make([]category.CategoryChildren, 0)
 		data.CategoryNumber = 0
 		if cat.CategoryLevel == 0 {
-			copier.Copy(&data, &cat)
+			_ = copier.Copy(&data, &cat)
 			var catechild []category.Category
 			catechild, err = category_service.QueryCategoryByTypeId(cat.CategoryId)
 			if err != nil {
@@ -58,7 +58,7 @@ func GetCategoryList(c *gin.Context) {
 				data.CategoryNumber++
 				var catchild category.CategoryChildren
 
-				copier.Copy(&catchild, &categchild)
+				_ = copier.Copy(&catchild, &categchild)
 				catchild.CategoryTotal = category_service.GetCategoryTotalNumberByCid(categchild.CategoryId)
 				catchild.CategoryAvatar = categchild.CategoryImageUrl
 				data.Categorychild = append(data.Categorychild, catchild)
@@ -92,7 +92,7 @@ func CreateCate(c *gin.Context) {
 	var cat category.Category
 	cat.CategoryImageUrl = cate.CategoryAvatar
 	cat.CategoryLevel = 1
-	copier.Copy(&cat, &cate)
+	_ = copier.Copy(&cat, &cate)
 	if err := category_service.CreateNewCategory(&cat); err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg(err.Error()))
 		c.Abort()
@@ -166,7 +166,7 @@ func GetCateDetail(c *gin.Context) {
 	}
 	var data category.CategoryCertainInfoResp
 	data.CategoryDetails = make([]category.CategoryDetailsInfo, 0)
-	copier.Copy(&data, &cat)
+	_ = copier.Copy(&data, &cat)
 	var totalnumber float64
 	totalnumber = 0
 	for _, catitem := range *item {
@@ -182,7 +182,7 @@ func GetCateDetail(c *gin.Context) {
 			c.Abort()
 			return
 		}
-		copier.Copy(&catd.CategoryAddress, &addr)
+		_ = copier.Copy(&catd.CategoryAddress, &addr)
 		catd.CategoryAddress = addr.AddressDetail
 		catd.CategoryLat = addr.AddressLat
 		catd.CategoryLng = addr.AddressLat
@@ -226,7 +226,7 @@ func GetMyCategoryDetails(c *gin.Context) {
 		data.CategoryNumber = 0
 		data.Categorychild = make([]category.CategoryMyChildren, 0)
 		if cat.CategoryLevel == 0 {
-			copier.Copy(&data, &cat)
+			_ = copier.Copy(&data, &cat)
 			var catechild []category.Category
 			catechild, err = category_service.QueryCategoryByTypeId(cat.CategoryId)
 			if err != nil {
@@ -241,7 +241,7 @@ func GetMyCategoryDetails(c *gin.Context) {
 				if catchild.CategoryTotal > 0 {
 					data.CategoryNumber++
 
-					copier.Copy(&catchild, &categchild)
+					_ = copier.Copy(&catchild, &categchild)
 
 					catchild.CategoryAvatar = categchild.CategoryImageUrl
 					data.Categorychild = append(data.Categorychild, catchild)

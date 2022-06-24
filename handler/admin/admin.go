@@ -55,7 +55,7 @@ func GetAllUsers(c *gin.Context) {
 	for _, usr := range *users {
 		result.UserCount++
 		var data admin.UserData
-		copier.Copy(&data, &usr)
+		_ = copier.Copy(&data, &usr)
 		//data.UserRole++
 		Adds, err := address_service.QueryAddressesByUserId(usr.UserId)
 		if err != nil {
@@ -65,7 +65,7 @@ func GetAllUsers(c *gin.Context) {
 		}
 		for _, addr := range Adds {
 			var usraddr admin.UserAddress
-			copier.Copy(&usraddr, &addr)
+			_ = copier.Copy(&usraddr, &addr)
 			usraddr.AddressIsDefault = (addr.AddressId == usr.UserDefaultAddressId)
 			data.UserAddresses = append(data.UserAddresses, usraddr)
 		}

@@ -67,7 +67,7 @@ func QueryAvailableOrder() (error, *rider.RiderQueryNewOrdersResp) {
 	availableorder.CreatorName = usr.UserName
 	availableorder.CreatorPhone = usr.UserPhone
 	addr, _ = address_service.QueryAddressById(usr.UserDefaultAddressId)
-	copier.Copy(&availableorder.CreatorAddress, &addr)
+	_ = copier.Copy(&availableorder.CreatorAddress, &addr)
 	availableorder.OrderReward, err = route_service.GetRouteItemTotalPrice(grou.GroupId)
 	if err != nil {
 		return err, nil

@@ -106,7 +106,7 @@ func LaunchNewGroup(c *gin.Context) {
 	groupinfo.GroupAddressId = createinfo.GroupAddressId
 	// groupinfo.GroupRiderId = nil
 
-	copier.Copy(&groupinfo, &createinfo)
+	_ = copier.Copy(&groupinfo, &createinfo)
 
 	groupinfo.GroupCreatorId = userID
 
@@ -339,7 +339,7 @@ func JoinGroup(c *gin.Context) {
 			continue
 		}
 		var neworder order.Order
-		copier.Copy(&neworder, &joindata)
+		_ = copier.Copy(&neworder, &joindata)
 		neworder.OrderGroupId = joininfo.GroupId
 		neworder.OrderUserId = userID
 		neworder.OrderAmount = joindata.OrderAmount
@@ -421,7 +421,7 @@ func EditGroup(c *gin.Context) {
 	}
 	userID := policy.GetId()
 
-	copier.Copy(&newgroup, editinfo)
+	_ = copier.Copy(&newgroup, editinfo)
 
 	if newgroup.GroupCreatorId != userID {
 		logging.ErrorF("the creator %d does not match the user %d!\n", newgroup.GroupCreatorId, userID)
@@ -525,7 +525,7 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 			result.Count++
 			var data group.GroupInfoSupplierData
 			data.GroupCommodity = make([]group.GroupInfoSupplierCommodity, 0)
-			copier.Copy(&data, &retgroup)
+			_ = copier.Copy(&data, &retgroup)
 			creator := user_service.QueryUserById(retgroup.GroupCreatorId)
 			data.GroupCreatorPhone = creator.UserPhone
 			data.GroupCreatorName = creator.UserName
@@ -539,7 +539,7 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 				cat := category_service.QueryCategoryById(it.RouteItemCategoryId)
 				data.GroupTotalPrice += cat.CategoryPrice * it.RouteItemAmount
 				var commo group.GroupInfoSupplierCommodity
-				copier.Copy(&commo, cat)
+				_ = copier.Copy(&commo, cat)
 				commo.ParentId = cat.CategoryFatherId
 				commo.RouteAmount = it.RouteItemAmount
 				data.GroupCommodity = append(data.GroupCommodity, commo)
@@ -554,7 +554,7 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 					c.Abort()
 					return
 				}
-				copier.Copy(&data.GroupRiderPos, riderpos)
+				_ = copier.Copy(&data.GroupRiderPos, riderpos)
 				_, est_end_time, err := route_service.QueryGroupTime(rt.RouteGroupId, rt.RouteUserId)
 				if err != nil {
 					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
@@ -594,7 +594,7 @@ func GetRiderGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID int
 	for _, gp := range *mygroup {
 		if groupcondition.Type == 0 || groupcondition.Type+1 == int(gp.GroupStatus) {
 			var data group.GroupInfoRiderData
-			copier.Copy(&data, &gp)
+			_ = copier.Copy(&data, &gp)
 			creator := user_service.QueryUserById(gp.GroupCreatorId)
 			data.GroupCreatorName = creator.UserName
 			data.GroupCreatorPhone = creator.UserPhone
@@ -604,7 +604,7 @@ func GetRiderGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID int
 				c.Abort()
 				return
 			}
-			copier.Copy(&data.GroupCreatorAddress, gpaddr)
+			_ = copier.Copy(&data.GroupCreatorAddress, gpaddr)
 			price := group_service.QueryGroupTotalPriceById(gp.GroupId)
 
 			data.GroupReward = 0.1 * price
@@ -669,7 +669,7 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 	var result group.GroupAgentDetail
 	result.GroupCommodities = make([]group.GroupAgentCommodity, 0)
 	gp := group_service.QueryGroupById(gid)
-	copier.Copy(&result, gp)
+	_ = copier.Copy(&result, gp)
 	result.GroupTotalPrice = group_service.QueryGroupTotalPriceById(gid)
 	result.GroupUserNumber = group_service.CountGroupUserById(gid)
 	creator := user_service.QueryUserById(gp.GroupCreatorId)
@@ -681,7 +681,7 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 		c.Abort()
 		return
 	}
-	copier.Copy(&result.GroupCreatorAddress, gpaddr)
+	_ = copier.Copy(&result.GroupCreatorAddress, gpaddr)
 	rider := user_service.QueryUserById(gp.GroupRiderId)
 	result.GroupRiderName = rider.UserName
 	result.GroupRiderPhone = rider.UserPhone
@@ -691,7 +691,7 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 		c.Abort()
 		return
 	}
-	copier.Copy(&result.GroupRiderPos, rideraddr)
+	_ = copier.Copy(&result.GroupRiderPos, rideraddr)
 	_, est_end_time, err := route_service.QueryGroupTime(gp.GroupId, 0)
 	if err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
@@ -705,7 +705,7 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 		var commo group.GroupAgentCommodity
 		commo.CategoryUser = make([]group.GroupAgentCommodityUser, 0)
 		catinfo := category_service.QueryCategoryById(cid)
-		copier.Copy(&commo, catinfo)
+		_ = copier.Copy(&commo, catinfo)
 		commo.Id = catinfo.CategoryFatherId
 		grouporders := order_service.QueryOrderByGroupCategory(gp.GroupId, cid)
 		commo.TotalAmount = 0
@@ -713,7 +713,7 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 			var catuser group.GroupAgentCommodityUser
 			commo.TotalAmount += ord.OrderAmount
 			userinfo := user_service.QueryUserById(ord.OrderUserId)
-			copier.Copy(&catuser, &userinfo)
+			_ = copier.Copy(&catuser, &userinfo)
 			catuser.UserAmount = ord.OrderAmount
 			commo.CategoryUser = append(commo.CategoryUser, catuser)
 		}
@@ -726,7 +726,7 @@ func RiderGetDetail(c *gin.Context, uid int, gid int) {
 	var result group.GroupRiderDetail
 	result.GroupRouteDetail = make([]group.GroupRiderRoute, 0)
 	gp := group_service.QueryGroupById(gid)
-	copier.Copy(&result, gp)
+	_ = copier.Copy(&result, gp)
 
 	creator := user_service.QueryUserById(gp.GroupCreatorId)
 	result.GroupCreatorName = creator.UserName
@@ -737,7 +737,7 @@ func RiderGetDetail(c *gin.Context, uid int, gid int) {
 		c.Abort()
 		return
 	}
-	copier.Copy(&result.GroupCreatorAddress, gpaddr)
+	_ = copier.Copy(&result.GroupCreatorAddress, gpaddr)
 	myuserinfo := user_service.QueryUserById(uid)
 	myaddr, err := address_service.QueryAddressById(myuserinfo.UserDefaultAddressId)
 	if err != nil {
@@ -745,7 +745,7 @@ func RiderGetDetail(c *gin.Context, uid int, gid int) {
 		c.Abort()
 		return
 	}
-	copier.Copy(&result.GroupRiderPos, myaddr)
+	_ = copier.Copy(&result.GroupRiderPos, myaddr)
 	log.Printf("gid= %d\n", gid)
 	grouproutes, err := route_service.QueryRouteByGroupId(gid)
 	if err != nil {
@@ -767,7 +767,7 @@ func RiderGetDetail(c *gin.Context, uid int, gid int) {
 			c.Abort()
 			return
 		}
-		copier.Copy(&rtdetail.RouteUserPos, storeaddr)
+		_ = copier.Copy(&rtdetail.RouteUserPos, storeaddr)
 		rtdetail.RouteVisited = rt.RouteDone
 		_, visit_time, err := route_service.QueryGroupTime(gid, rt.RouteUserId)
 		if err != nil {

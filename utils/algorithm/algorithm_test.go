@@ -8,5 +8,5 @@ import (
 func TestAlgorithm(t *testing.T) {
 	setting.GRPCSetting.Enable = false
 	Setup()
-	Schedule(1, 1)
+	_ = Schedule(1, 1)
 }
