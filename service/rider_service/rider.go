@@ -16,8 +16,7 @@ import (
 )
 
 func GetRiderAvailable(RiderId int) {
-	var usr user.User
-	usr = user_service.QueryUserById(RiderId)
+	usr := user_service.QueryUserById(RiderId)
 	usr.UserAvailable = true
 	err := db.MysqlDB.Model(&usr).Updates(usr).Error
 	if err == nil {
@@ -26,8 +25,7 @@ func GetRiderAvailable(RiderId int) {
 }
 
 func GetRiderNotavailable(RiderId int) {
-	var usr user.User
-	usr = user_service.QueryUserById(RiderId)
+	usr := user_service.QueryUserById(RiderId)
 	usr.UserAvailable = false
 	err := db.MysqlDB.Model(&usr).Update("user_available", 0).Error
 	if err == nil {
