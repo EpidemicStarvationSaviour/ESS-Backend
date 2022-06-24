@@ -92,6 +92,11 @@ func LaunchNewGroup(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	if len(createinfo.GroupCommodities) == 0 {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
 	userID := policy.GetId()
 
 	var groupinfo group.Group
