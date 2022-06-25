@@ -44,8 +44,8 @@ type GroupInfoAddress struct {
 }
 
 type GroupInfoCommodity struct {
-	CategoryId       int     `json:"type_id"`
-	ParentId         int     `json:"id"`
+	CategoryId       int     `json:"id"`
+	ParentId         int     `json:"type_id"`
 	CategoryName     string  `json:"name"`
 	CategoryImageUrl string  `json:"avatar"`
 	CategoryPrice    float64 `json:"price"`
@@ -117,8 +117,8 @@ type GroupEditReq struct {
 }
 
 type GroupInfoSupplierCommodity struct {
-	CategoryId       int     `json:"type_id"`
-	ParentId         int     `json:"id"`
+	CategoryId       int     `json:"id"`
+	ParentId         int     `json:"type_id"`
 	CategoryName     string  `json:"name"`
 	CategoryImageUrl string  `json:"avatar"`
 	CategoryPrice    float64 `json:"price"`
@@ -187,8 +187,8 @@ type GroupAgentCommodityUser struct {
 }
 
 type GroupAgentCommodity struct {
-	CategoryId       int                       `json:"type_id"`
-	Id               int                       `json:"id"`
+	CategoryId       int                       `json:"id"`
+	Id               int                       `json:"type_id"`
 	CategoryName     string                    `json:"name"`
 	CategoryImageUrl string                    `json:"avatar"`
 	CategoryPrice    float64                   `json:"price"`
