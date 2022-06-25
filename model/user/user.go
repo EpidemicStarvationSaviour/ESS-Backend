@@ -25,7 +25,7 @@ type UserCreateReq struct {
 	UserSecret  string               `json:"user_secret" form:"user_secret" binding:"required,max=20"`
 	UserRole    Role                 `json:"user_role" form:"user_role" binding:"required" example:"3"`
 	UserName    string               `json:"user_name" form:"user_name" binding:"required,max=30"`
-	UserAddress UserCreateReqAddress `json:"user_address" form:"user_address" binding:"required"`
+	UserAddress UserCreateReqAddress `json:"user_address" form:"user_address"`
 }
 
 type UserCreateReqAddress struct {
