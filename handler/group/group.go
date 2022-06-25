@@ -49,7 +49,12 @@ func GetUserAgentGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID
 	}
 
 	result := group.GroupInfoResp{Data: []group.GroupInfoData{}}
+	added := map[int]struct{}{}
 	for _, order := range *Orders {
+		if _, ok := added[order.OrderGroupId]; ok {
+			continue
+		}
+		added[order.OrderGroupId] = struct{}{}
 		retgroup := group_service.QueryGroupById(order.OrderGroupId)
 		if groupcondition.Type == 0 || retgroup.GroupStatus == group.Status(groupcondition.Type) {
 			data, err := group_service.GetGroupDetail(retgroup, userinfo.UserId)
