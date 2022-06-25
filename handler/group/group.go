@@ -543,6 +543,7 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 		retgroup := group_service.QueryGroupById(rt.RouteGroupId)
 
 		status, err := GetGroupStatusForSupplier(retgroup, userID) // TODO: test
+		retgroup.GroupStatus = group.Status(status)
 		if err != nil {
 			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 			c.Abort()
@@ -885,9 +886,9 @@ func GetGroupStatusForSupplier(grp *group.Group, uid int) (int, error) {
 				return 0, err
 			}
 			if !rt.RouteDone {
-				return 2, nil
+				return 1, nil
 			} else {
-				return 3, nil
+				return 2, nil
 			}
 		}
 	case group.Finished:

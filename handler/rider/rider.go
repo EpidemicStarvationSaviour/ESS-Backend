@@ -71,13 +71,16 @@ func RiderUploadAddressPort(c *gin.Context) {
 // @Success 200 {object} rider.RiderQueryNewOrdersResp
 // @Router  /rider/query [get]
 func RiderQueryNewOrder(c *gin.Context) {
-	err, rider := rider_service.QueryAvailableOrder()
+	rid, err := rider_service.QueryAvailableOrder()
 	if err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 		c.Abort()
 		return
 	}
-	c.Set(define.ESSRESPONSE, response.JSONData(&rider))
+	if rid == nil {
+		rid = &rider.RiderQueryNewOrdersResp{}
+	}
+	c.Set(define.ESSRESPONSE, response.JSONData(&rid))
 }
 
 // @Summary Rider's Feedback To New Order
@@ -116,5 +119,9 @@ func OrderFeedback(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	rider_service.RefreshOrderStatus(Uid, RSP)
+	if err := rider_service.RefreshOrderStatus(Uid, RSP); err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+		c.Abort()
+		return
+	}
 }

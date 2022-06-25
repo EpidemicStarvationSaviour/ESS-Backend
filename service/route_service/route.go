@@ -100,6 +100,7 @@ func QueryGroupTime(gid int, uid int) (int64, time.Time, error) {
 		return 0, time.Now(), nil
 	}
 	var start_at, end_at time.Time
+	first_undone := true
 	if !(*routes)[0].RouteDone {
 		start_at = time.Now()
 		end_at = start_at
@@ -112,6 +113,7 @@ func QueryGroupTime(gid int, uid int) (int64, time.Time, error) {
 		if err != nil {
 			return 0, time.Now(), err
 		}
+		first_undone = false
 	} else {
 		start_at = *(*routes)[0].RouteFinishedAt
 		end_at = start_at
@@ -121,7 +123,23 @@ func QueryGroupTime(gid int, uid int) (int64, time.Time, error) {
 		if rt.RouteDone {
 			end_at = *rt.RouteFinishedAt
 		} else {
-			result += rt.RouteEstimatedTime
+			if first_undone {
+				result += int64(time.Since(end_at).Seconds())
+
+				dst := user_service.QueryUserById((*routes)[0].RouteUserId)
+				if dst.UserId < 0 {
+					return 0, time.Now(), fmt.Errorf("user not found")
+				}
+				duration, err := QuerySetupTime(gid, dst.UserDefaultAddressId)
+				if err != nil {
+					return 0, time.Now(), err
+				}
+				result += duration
+
+				first_undone = false
+			} else {
+				result += rt.RouteEstimatedTime
+			}
 		}
 		if rt.RouteUserId == uid {
 			break
