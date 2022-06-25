@@ -304,52 +304,49 @@ func JoinGroup(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	if len(joininfo.OrderData) == 0 {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
 	userID := policy.GetId()
 	joingroup := group_service.QueryGroupById(joininfo.GroupId)
-	if joingroup.GroupStatus != group.Created {
+	if joingroup == nil || joingroup.GroupStatus != group.Created {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 		c.Abort()
 		return
 	}
-
-	groupords, err := order_service.QueryOrderByGroup(joininfo.GroupId)
-	if err != nil {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
-		c.Abort()
-		return
+	cats := make(map[int]struct{}, len(joingroup.GroupCategories))
+	for _, s := range joingroup.GroupCategories {
+		cats[s.CategoryId] = struct{}{}
 	}
-	for _, ord := range *groupords {
-		if userID == ord.OrderUserId {
-			for id, cat := range joininfo.OrderData {
-				if cat.OrderCategoryId == ord.OrderCategoryId {
-					ord.OrderAmount = cat.OrderAmount
-					err := order_service.UpdateOrder(ord)
-					if err != nil {
-						c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
-						c.Abort()
-						return
-					}
-					joininfo.OrderData[id].OrderCategoryId = -1
-				}
-			}
-		}
-	}
-	for _, joindata := range joininfo.OrderData {
-		if joindata.OrderCategoryId == -1 {
-			continue
-		}
-		var neworder order.Order
-		_ = copier.Copy(&neworder, &joindata)
-		neworder.OrderGroupId = joininfo.GroupId
-		neworder.OrderUserId = userID
-		neworder.OrderAmount = joindata.OrderAmount
-		err := order_service.CreateNewOrder(&neworder)
-		if err != nil {
-			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+	for _, order := range joininfo.OrderData {
+		if _, ok := cats[order.OrderCategoryId]; !ok {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
 			c.Abort()
 			return
 		}
+	}
 
+	if err := group_service.DeleteOrderByUserID(joininfo.GroupId, userID); err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+		c.Abort()
+		return
+	}
+	ords := []order.Order{}
+	for _, v := range joininfo.OrderData {
+		ord := order.Order{
+			OrderUserId:     userID,
+			OrderGroupId:    joininfo.GroupId,
+			OrderCategoryId: v.OrderCategoryId,
+			OrderAmount:     v.OrderAmount,
+		}
+		ords = append(ords, ord)
+	}
+	if err := order_service.CreateOrders(ords); err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+		c.Abort()
+		return
 	}
 }
 

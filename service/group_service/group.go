@@ -36,7 +36,7 @@ func QueryGroupByCreatorId(cid int) *[]group.Group {
 
 func QueryGroupById(gid int) *group.Group {
 	var resgroup group.Group
-	resinfo := db.MysqlDB.Where(&group.Group{GroupId: gid}).First(&resgroup)
+	resinfo := db.MysqlDB.Preload("GroupCategories").Where(&group.Group{GroupId: gid}).First(&resgroup)
 	if resinfo.RowsAffected == 0 {
 		logging.InfoF("No Group with gid %d !\n", gid)
 	}
@@ -187,4 +187,8 @@ func GetGroupDetail(grp *group.Group, uid int) (*group.GroupInfoData, error) {
 		resinfo.Commodities = append(resinfo.Commodities, commo)
 	}
 	return &resinfo, nil
+}
+
+func DeleteOrderByUserID(gid, uid int) error {
+	return db.MysqlDB.Delete(&order.Order{}, "order_group_id = ? and order_user_id = ?", gid, uid).Error
 }

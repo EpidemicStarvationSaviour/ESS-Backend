@@ -21,6 +21,13 @@ func CreateNewOrder(ord *order.Order) error {
 	return nil
 }
 
+func CreateOrders(ord []order.Order) error {
+	if err := db.MysqlDB.Create(&ord).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func QueryUidByGroup(gid int) (*[]int, error) {
 	resid := []int{}
 	if err := db.MysqlDB.Model(&order.Order{}).Select([]string{"order_user_id"}).Distinct([]string{"order_user_id"}).Where(&order.Order{OrderGroupId: gid}).Find(resid).Error; err != nil {
