@@ -47,14 +47,11 @@ func QueryAvailableOrder() (error, *rider.RiderQueryNewOrdersResp) {
 	var availableorder rider.RiderQueryNewOrdersResp
 	var grou group.Group
 
-	if err := db.MysqlDB.Where(&group.Group{GroupStatus: 2, GroupSeenByRider: false}).First(&grou).Error; err != nil { //数据库的返回值
+	if err := db.MysqlDB.Where(&group.Group{GroupStatus: 2}).Order("group_updated_at ASC").First(&grou).Error; err != nil {
 		return err, nil
 	}
-	grou.GroupSeenByRider = true
-	err := db.MysqlDB.Model(grou).Updates(grou).Error
-	if err != nil {
-		return err, nil
-	}
+
+	var err error
 	var usr user.User
 	var addr *address.Address
 	OrderId = grou.GroupId
@@ -76,28 +73,28 @@ func QueryAvailableOrder() (error, *rider.RiderQueryNewOrdersResp) {
 	if err != nil {
 		return err, nil
 	}
-	availableorder.OrderExpectedTime = int64(time.Since(est_end_time).Minutes())
+	availableorder.OrderExpectedTime = int64(-time.Since(est_end_time).Minutes())
 
 	return nil, &availableorder
 }
 
-func RiderFeedbackToOrder(rid int, yesorno int) {
-	var grou group.Group
-	db.MysqlDB.Where(&group.Group{GroupId: OrderId}).Find(&grou)
-	if yesorno == 1 {
-		grou.GroupSeenByRider = true
-		grou.GroupStatus = 3
-		usr := user_service.QueryUserById(rid)
-		grou.GroupRiderId = usr.UserId
-	}
-	if yesorno == 0 {
-		grou.GroupSeenByRider = true
-	}
-	err := db.MysqlDB.Model(grou).Updates(grou).Error
-	if err != nil {
-		return
-	}
-}
+// func RiderFeedbackToOrder(rid int, yesorno int) {
+// 	var grou group.Group
+// 	db.MysqlDB.Where(&group.Group{GroupId: OrderId}).Find(&grou)
+// 	if yesorno == 1 {
+// 		grou.GroupSeenByRider = true
+// 		grou.GroupStatus = 3
+// 		usr := user_service.QueryUserById(rid)
+// 		grou.GroupRiderId = usr.UserId
+// 	}
+// 	if yesorno == 0 {
+// 		grou.GroupSeenByRider = true
+// 	}
+// 	err := db.MysqlDB.Model(grou).Updates(grou).Error
+// 	if err != nil {
+// 		return
+// 	}
+// }
 func RefreshOrderStatus(uid int, RFTO rider.FeedbackToOrder) {
 	usr := user_service.QueryUserById(uid)
 	if usr.UserRole == 2 {

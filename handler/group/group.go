@@ -588,7 +588,7 @@ func GetSupplierGroup(c *gin.Context, groupcondition group.GroupInfoReq, userID 
 					c.Abort()
 					return
 				}
-				data.GroupRiderPos.RouteEstimatedTime = int64(time.Since(est_end_time).Minutes())
+				data.GroupRiderPos.RouteEstimatedTime = int64(-time.Since(est_end_time).Minutes())
 			}
 			result.GroupData = append(result.GroupData, data)
 		}
@@ -710,7 +710,7 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 	}
 
 	_ = copier.Copy(&result.GroupCreatorAddress, gpaddr)
-	if gp.GroupSeenByRider {
+	if gp.GroupRiderId != 0 {
 		rider := user_service.QueryUserById(gp.GroupRiderId)
 		result.GroupRiderName = rider.UserName
 		result.GroupRiderPhone = rider.UserPhone
@@ -728,9 +728,8 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 			c.Abort()
 			return
 		}
-		result.GroupRiderPos.RouteEstimatedTime = int64(time.Since(est_end_time).Minutes())
+		result.GroupRiderPos.RouteEstimatedTime = int64(-time.Since(est_end_time).Minutes())
 	}
-
 	CategoryIDs := group_service.QueryGroupCategories(gp.GroupId)
 
 	for _, cid := range *CategoryIDs {

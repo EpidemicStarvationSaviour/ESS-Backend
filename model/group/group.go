@@ -21,7 +21,6 @@ type Group struct {
 	GroupRider       user.User           `gorm:"foreignKey:GroupRiderId"`
 	GroupRiderId     int                 `gorm:""`
 	GroupStatus      Status              `gorm:"not null;default:1"`
-	GroupSeenByRider bool                `gorm:"not null;default:false"`
 	GroupCreatedAt   int64               `gorm:"autoCreateTime"`
 	GroupUpdatedAt   int64               `gorm:"autoUpdateTime"`
 	GroupDeleted     gorm.DeletedAt

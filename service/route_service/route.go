@@ -114,6 +114,7 @@ func QueryGroupTime(gid int, uid int) (int64, time.Time, error) {
 		}
 	} else {
 		start_at = *(*routes)[0].RouteFinishedAt
+		end_at = start_at
 	}
 
 	for _, rt := range *routes {
