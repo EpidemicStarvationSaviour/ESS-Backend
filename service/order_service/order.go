@@ -30,7 +30,7 @@ func CreateOrders(ord []order.Order) error {
 
 func QueryUidByGroup(gid int) (*[]int, error) {
 	resid := []int{}
-	if err := db.MysqlDB.Model(&order.Order{}).Select([]string{"order_user_id"}).Distinct([]string{"order_user_id"}).Where(&order.Order{OrderGroupId: gid}).Find(resid).Error; err != nil {
+	if err := db.MysqlDB.Model(&order.Order{}).Where(&order.Order{OrderGroupId: gid}).Distinct([]string{"order_user_id"}).Find(&resid).Error; err != nil {
 		return &resid, err
 	}
 	return &resid, nil

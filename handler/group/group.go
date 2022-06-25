@@ -132,6 +132,7 @@ func LaunchNewGroup(c *gin.Context) {
 			for _, cid := range createinfo.GroupCommodities {
 				neworder.OrderCategoryId = cid
 				neworder.OrderUserId = uid
+				neworder.OrderId = 0
 				if uid == userID {
 					leader_order_inserted = true
 				}
@@ -147,6 +148,7 @@ func LaunchNewGroup(c *gin.Context) {
 	if !leader_order_inserted {
 		neworder.OrderCategoryId = createinfo.GroupCommodities[0]
 		neworder.OrderUserId = userID
+		neworder.OrderId = 0
 		err := order_service.CreateNewOrder(&neworder)
 		if err != nil {
 			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_GROUP_CREATE_FAIL))
