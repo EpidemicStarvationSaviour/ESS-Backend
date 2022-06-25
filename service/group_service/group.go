@@ -115,7 +115,7 @@ func QueryGroupCategories(gid int) *[]int {
 
 func RiderFinishedCount(uid int) (int64, error) {
 	var count int64
-	err := db.MysqlDB.Where(&group.Group{GroupRiderId: uid, GroupStatus: group.Finished}).Count(&count).Error
+	err := db.MysqlDB.Model(&group.Group{}).Where(&group.Group{GroupRiderId: uid, GroupStatus: group.Finished}).Count(&count).Error
 	return count, err
 }
 
