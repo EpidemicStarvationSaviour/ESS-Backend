@@ -409,6 +409,11 @@ func EditGroup(c *gin.Context) {
 
 	newgroup = *group_service.QueryGroupById(newgroup.GroupId)
 	old_status := newgroup.GroupStatus
+	if old_status != group.Created {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
 
 	var editinfo group.GroupEditReq
 	if err := c.ShouldBind(&editinfo); err != nil {
@@ -417,6 +422,23 @@ func EditGroup(c *gin.Context) {
 		return
 	}
 	userID := policy.GetId()
+	if userID != newgroup.GroupCreatorId {
+		c.Set(define.ESSRESPONSE, response.JSONErrorWithMsg("没有权限"))
+		c.Abort()
+		return
+	}
+	if len(editinfo.GroupCommodityIds) == 0 {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
+	for _, v := range editinfo.GroupDeteledUsers {
+		if newgroup.GroupCreatorId == v {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+			c.Abort()
+			return
+		}
+	}
 
 	_ = copier.Copy(&newgroup, editinfo)
 
@@ -438,11 +460,10 @@ func EditGroup(c *gin.Context) {
 			if deleteusr == ord.OrderUserId {
 				err := order_service.DeleteOrder(&ord)
 				if err != nil {
-					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 					c.Abort()
 					return
 				}
-
 			}
 		}
 	}
@@ -459,7 +480,7 @@ func EditGroup(c *gin.Context) {
 		if newgroup.GroupCategories[idx].CategoryId > 0 {
 			err := order_service.DeleteOrderByGroupCategory(newgroup.GroupId, newgroup.GroupCategories[idx].CategoryId)
 			if err != nil {
-				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 				c.Abort()
 				return
 			}
