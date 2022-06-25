@@ -434,11 +434,11 @@ func EditGroup(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	if len(editinfo.GroupCommodityIds) == 0 {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
-		c.Abort()
-		return
-	}
+	//if len(editinfo.GroupCommodityIds) == 0 {
+	//	c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+	//	c.Abort()
+	//	return
+	//}
 	for _, v := range editinfo.GroupDeteledUsers {
 		if newgroup.GroupCreatorId == v {
 			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
@@ -474,32 +474,34 @@ func EditGroup(c *gin.Context) {
 			}
 		}
 	}
-	for i := range editinfo.GroupCommodityIds {
-		for j := range newgroup.GroupCategories {
-			if editinfo.GroupCommodityIds[i] == newgroup.GroupCategories[j].CategoryId {
-				editinfo.GroupCommodityIds[i] = -1
-				newgroup.GroupCategories[j].CategoryId = -newgroup.GroupCategories[j].CategoryId
+	if len(editinfo.GroupCommodityIds) > 0 {
+		for i := range editinfo.GroupCommodityIds {
+			for j := range newgroup.GroupCategories {
+				if editinfo.GroupCommodityIds[i] == newgroup.GroupCategories[j].CategoryId {
+					editinfo.GroupCommodityIds[i] = -1
+					newgroup.GroupCategories[j].CategoryId = -newgroup.GroupCategories[j].CategoryId
+				}
 			}
 		}
-	}
-	var idx = 0
-	for idx < len(newgroup.GroupCategories) {
-		if newgroup.GroupCategories[idx].CategoryId > 0 {
-			err := order_service.DeleteOrderByGroupCategory(newgroup.GroupId, newgroup.GroupCategories[idx].CategoryId)
-			if err != nil {
-				c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
-				c.Abort()
-				return
+		var idx = 0
+		for idx < len(newgroup.GroupCategories) {
+			if newgroup.GroupCategories[idx].CategoryId > 0 {
+				err := order_service.DeleteOrderByGroupCategory(newgroup.GroupId, newgroup.GroupCategories[idx].CategoryId)
+				if err != nil {
+					c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+					c.Abort()
+					return
+				}
+				newgroup.GroupCategories = append(newgroup.GroupCategories[:idx], newgroup.GroupCategories[idx+1:]...)
+			} else {
+				newgroup.GroupCategories[idx].CategoryId = -newgroup.GroupCategories[idx].CategoryId
+				idx++
 			}
-			newgroup.GroupCategories = append(newgroup.GroupCategories[:idx], newgroup.GroupCategories[idx+1:]...)
-		} else {
-			newgroup.GroupCategories[idx].CategoryId = -newgroup.GroupCategories[idx].CategoryId
-			idx++
 		}
-	}
-	for i := range editinfo.GroupCommodityIds {
-		if editinfo.GroupCommodityIds[i] > 0 {
-			newgroup.GroupCategories = append(newgroup.GroupCategories, *category_service.QueryCategoryById(editinfo.GroupCommodityIds[i]))
+		for i := range editinfo.GroupCommodityIds {
+			if editinfo.GroupCommodityIds[i] > 0 {
+				newgroup.GroupCategories = append(newgroup.GroupCategories, *category_service.QueryCategoryById(editinfo.GroupCommodityIds[i]))
+			}
 		}
 	}
 
