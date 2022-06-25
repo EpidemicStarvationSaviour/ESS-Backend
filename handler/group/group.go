@@ -708,24 +708,29 @@ func AgentGetDetail(c *gin.Context, uid int, gid int) {
 		c.Abort()
 		return
 	}
+
 	_ = copier.Copy(&result.GroupCreatorAddress, gpaddr)
-	rider := user_service.QueryUserById(gp.GroupRiderId)
-	result.GroupRiderName = rider.UserName
-	result.GroupRiderPhone = rider.UserPhone
-	rideraddr, err := address_service.QueryAddressById(rider.UserDefaultAddressId)
-	if err != nil {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
-		c.Abort()
-		return
+	if gp.GroupSeenByRider {
+		rider := user_service.QueryUserById(gp.GroupRiderId)
+		result.GroupRiderName = rider.UserName
+		result.GroupRiderPhone = rider.UserPhone
+		rideraddr, err := address_service.QueryAddressById(rider.UserDefaultAddressId)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+			c.Abort()
+			return
+		}
+		result.GroupRiderPos = &group.GroupRiderAddress{}
+		_ = copier.Copy(result.GroupRiderPos, rideraddr)
+		_, est_end_time, err := route_service.QueryGroupTime(gp.GroupId, 0)
+		if err != nil {
+			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
+			c.Abort()
+			return
+		}
+		result.GroupRiderPos.RouteEstimatedTime = int64(time.Since(est_end_time).Minutes())
 	}
-	_ = copier.Copy(&result.GroupRiderPos, rideraddr)
-	_, est_end_time, err := route_service.QueryGroupTime(gp.GroupId, 0)
-	if err != nil {
-		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
-		c.Abort()
-		return
-	}
-	result.GroupRiderPos.RouteEstimatedTime = int64(time.Since(est_end_time).Minutes())
+
 	CategoryIDs := group_service.QueryGroupCategories(gp.GroupId)
 
 	for _, cid := range *CategoryIDs {

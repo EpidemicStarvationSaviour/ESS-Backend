@@ -210,9 +210,9 @@ type GroupAgentDetail struct {
 	GroupTotalPrice     float64               `json:"total_price"`
 	GroupCreatedAt      int64                 `json:"created_time"`
 	GroupUpdatedAt      int64                 `json:"updated_time"`
-	GroupRiderPhone     string                `json:"rider_phone"`
-	GroupRiderName      string                `json:"rider_name"`
-	GroupRiderPos       GroupRiderAddress     `json:"rider_pos"`
+	GroupRiderPhone     string                `json:"rider_phone,omitempty"`
+	GroupRiderName      string                `json:"rider_name,omitempty"`
+	GroupRiderPos       *GroupRiderAddress    `json:"rider_pos,omitempty"`
 	GroupCommodities    []GroupAgentCommodity `json:"commodity_detail"`
 }
 
