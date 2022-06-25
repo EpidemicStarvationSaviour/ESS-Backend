@@ -241,7 +241,3 @@ type GroupRiderDetail struct {
 	GroupRiderPos       GroupRiderAddress   `json:"rider_pos"`
 	GroupRouteDetail    []GroupRiderRoute   `json:"route_detail"`
 }
-
-type GroupDetailReq struct {
-	GroupId int `uri:"id" binding:"required"`
-}

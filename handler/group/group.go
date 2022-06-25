@@ -17,6 +17,7 @@ import (
 	"ess/utils/response"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -403,16 +404,15 @@ func EditGroup(c *gin.Context) {
 	claim, _ := c.Get(define.ESSPOLICY)
 	policy, _ := claim.(authUtils.Policy)
 	var newgroup group.Group
-	newgroup.GroupId = c.GetInt(c.Param("id"))
-	{
-		var req_uri group.GroupDetailReq
-		if err := c.ShouldBindUri(&req_uri); err != nil {
-			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
-			c.Abort()
-			return
-		}
-		newgroup.GroupId = req_uri.GroupId
+
+	groupIdStr := c.Param("id")
+	groupIdInt64, err := strconv.ParseInt(groupIdStr, 10, 64)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
 	}
+	newgroup.GroupId = int(groupIdInt64)
 
 	newgroup = *group_service.QueryGroupById(newgroup.GroupId)
 	old_status := newgroup.GroupStatus
@@ -837,15 +837,14 @@ func GetDetailInfo(c *gin.Context) {
 	policy, _ := claim.(authUtils.Policy)
 
 	var GroupId int
-	{
-		var req_uri group.GroupDetailReq
-		if err := c.ShouldBindUri(&req_uri); err != nil {
-			c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
-			c.Abort()
-			return
-		}
-		GroupId = req_uri.GroupId
+	groupIdStr := c.Param("id")
+	groupIdInt64, err := strconv.ParseInt(groupIdStr, 10, 64)
+	if err != nil {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
 	}
+	GroupId = int(groupIdInt64)
 	UserId := policy.GetId()
 
 	switch policy.ConvertToUser().UserRole {
