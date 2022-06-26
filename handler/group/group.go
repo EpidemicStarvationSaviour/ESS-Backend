@@ -758,6 +758,11 @@ func RiderGetDetail(c *gin.Context, uid int, gid int) {
 	var result group.GroupRiderDetail
 	result.GroupRouteDetail = make([]group.GroupRiderRoute, 0)
 	gp := group_service.QueryGroupById(gid)
+	if gp.GroupRiderId != uid {
+		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_PARAM_FAIL))
+		c.Abort()
+		return
+	}
 	_ = copier.Copy(&result, gp)
 
 	creator := user_service.QueryUserById(gp.GroupCreatorId)
