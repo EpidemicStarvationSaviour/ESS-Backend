@@ -46,11 +46,11 @@ func RefreshRiderPosition(RiderId int, lat float64, lng float64) {
 
 var OrderId int
 
-func QueryAvailableOrder() (*rider.RiderQueryNewOrdersResp, error) {
+func QueryAvailableOrder(uid int) (*rider.RiderQueryNewOrdersResp, error) {
 	var availableorder rider.RiderQueryNewOrdersResp
 	var grou group.Group
 
-	if err := db.MysqlDB.Where(&group.Group{GroupStatus: group.Submitted}).Or(&group.Group{GroupStatus: group.Delivering}).Order("group_updated_at ASC").First(&grou).Error; err != nil {
+	if err := db.MysqlDB.Where(&group.Group{GroupRiderId: uid}).Where(db.MysqlDB.Where(&group.Group{GroupStatus: group.Submitted}).Or(&group.Group{GroupStatus: group.Delivering})).Order("group_updated_at ASC").First(&grou).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}

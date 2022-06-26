@@ -71,7 +71,10 @@ func RiderUploadAddressPort(c *gin.Context) {
 // @Success 200 {object} rider.RiderQueryNewOrdersResp
 // @Router  /rider/query [get]
 func RiderQueryNewOrder(c *gin.Context) {
-	rid, err := rider_service.QueryAvailableOrder()
+	claim, _ := c.Get(define.ESSPOLICY)
+	policy, _ := claim.(authUtils.Policy)
+	uid := policy.GetId()
+	rid, err := rider_service.QueryAvailableOrder(uid)
 	if err != nil {
 		c.Set(define.ESSRESPONSE, response.JSONError(response.ERROR_DATABASE_QUERY))
 		c.Abort()
