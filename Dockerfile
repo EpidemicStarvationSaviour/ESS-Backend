@@ -1,8 +1,8 @@
-FROM golang:1.18-alpine
+FROM golang:1.18-bullseye
 EXPOSE 8080
 WORKDIR /workspace
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-RUN apk update
+RUN sed -i "s@http://\(deb\|security\).debian.org@https://mirrors.xxx.com@g" /etc/apt/sources.list
+RUN apt update
 # cache deps before building and copying source so that we don't need to re-download as much
 # and so that source changes don't invalidate our downloaded layer
 WORKDIR /app
