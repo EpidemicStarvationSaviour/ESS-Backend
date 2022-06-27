@@ -80,10 +80,7 @@ func RiderQueryNewOrder(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	if rid == nil {
-		rid = &rider.RiderQueryNewOrdersResp{}
-	}
-	c.Set(define.ESSRESPONSE, response.JSONData(&rid))
+	c.Set(define.ESSRESPONSE, response.JSONData(rid))
 }
 
 // @Summary Rider's Feedback To New Order
